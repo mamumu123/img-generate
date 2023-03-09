@@ -358,3 +358,5 @@ export const TAB_LABEL = {
   Mianbuzhuangshi: '面部装饰',
   Yanbuzhuangshi: '眼部装饰',
 };
+
+export type keyImg = keyof typeof TRAITS;

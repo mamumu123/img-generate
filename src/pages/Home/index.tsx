@@ -1,11 +1,9 @@
-import { TAB_KEY_LIST, TAB_LABEL, TRAITS } from '@/constants/traits';
-import { isWeChat, loadImage } from '@/utils';
+import { TAB_KEY_LIST, TAB_LABEL, TRAITS, keyImg } from '@/constants/traits';
+import { isWeChat, loadImage, getRandomTraits } from '@/utils';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, Col, message, Row, Tabs } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './index.less';
-
-type keyImg = keyof typeof TRAITS;
 
 const HomePage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -124,35 +122,45 @@ const HomePage: React.FC = () => {
         <div>
           <canvas id="canvas" ref={canvasRef} width="200" height="200"></canvas>
         </div>
-        <Button
-          size="small"
-          type="primary"
-          onClick={async () => {
-            if (isWeChat()) {
-              message.info({
-                content:
-                  '由于微信浏览器的限制，无法下载图片，请【长摁头像保存为图片】或者右上角用系统浏览器打开使用，谢谢。',
-              });
-            } else {
-              const canvas = canvasRef.current;
-              // 创建一个 a 标签，并设置 href 和 download 属性
-              const el = document.createElement('a');
-              // 设置 href 为图片经过 base64 编码后的字符串，默认为 png 格式
-              if (!canvas) {
-                message.error('遇到一些问题，请稍后再试');
-                return;
-              }
-              el.href = canvas.toDataURL();
-              el.download = '文件名称';
+        <div className={styles.button__box}>
+          <Button
+            size="small"
+            type="primary"
+            onClick={async () => {
+              if (isWeChat()) {
+                message.info({
+                  content:
+                    '由于微信浏览器的限制，无法下载图片，请【长摁头像保存为图片】或者右上角用系统浏览器打开使用，谢谢。',
+                });
+              } else {
+                const canvas = canvasRef.current;
+                // 创建一个 a 标签，并设置 href 和 download 属性
+                const el = document.createElement('a');
+                // 设置 href 为图片经过 base64 编码后的字符串，默认为 png 格式
+                if (!canvas) {
+                  message.error('遇到一些问题，请稍后再试');
+                  return;
+                }
+                el.href = canvas.toDataURL();
+                el.download = '文件名称';
 
-              // 创建一个点击事件并对 a 标签进行触发
-              const event = new MouseEvent('click');
-              el.dispatchEvent(event);
-            }
-          }}
-        >
-          下载头像
-        </Button>
+                // 创建一个点击事件并对 a 标签进行触发
+                const event = new MouseEvent('click');
+                el.dispatchEvent(event);
+              }
+            }}
+          >
+            下载头像
+          </Button>
+          <Button
+            size="small"
+            onClick={async () => {
+              setImgSelect(getRandomTraits());
+            }}
+          >
+            随机生成
+          </Button>
+        </div>
       </div>
     );
   };
