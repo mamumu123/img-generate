@@ -5,6 +5,8 @@ export default defineConfig({
   access: {},
   model: {},
   initialState: {},
+  base: '/img-generate/',
+  publicPath: '/img-generate/',
   request: {},
   layout: {
     title: '@umijs/max',

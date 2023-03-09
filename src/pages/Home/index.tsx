@@ -31,7 +31,7 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      const images = ['/traits/Lian.jpg'];
+      const images = ['traits/Lian.jpg'];
 
       ctx?.clearRect(0, 0, 200, 200);
       ctx.beginPath();
