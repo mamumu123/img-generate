@@ -34,7 +34,7 @@ export default defineConfig({
     // },
   ],
   analytics: {
-    baidu: '14318f32f234fe5474f03e94303b7af6',
+    baidu: 'e4ec5f782f5d1d99801021aff8419db7',
   },
   npmClient: 'pnpm',
 });
