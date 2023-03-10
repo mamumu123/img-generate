@@ -33,5 +33,8 @@ export default defineConfig({
     //   component: './Table',
     // },
   ],
+  analytics: {
+    baidu: '14318f32f234fe5474f03e94303b7af6',
+  },
   npmClient: 'pnpm',
 });
