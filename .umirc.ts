@@ -4,6 +4,9 @@ export default defineConfig({
   antd: {},
   access: {},
   model: {},
+  // history: {
+  //   type: 'hash'
+  // },
   initialState: {},
   base: '/img-generate/',
   publicPath: '/img-generate/',
@@ -12,14 +15,14 @@ export default defineConfig({
     title: '@umijs/max',
   },
   routes: [
-    {
-      path: '/',
-      redirect: '/home',
-    },
+    // {
+    //   path: '/',
+    //   redirect: '/home',
+    // },
     {
       name: '头像拼接',
-      path: '/home',
-      component: './Home',
+      path: '/',
+      component: './',
     },
 
     // {
@@ -32,6 +35,7 @@ export default defineConfig({
     //   path: '/table',
     //   component: './Table',
     // },
+    { component: '@/pages/' },
   ],
   analytics: {
     baidu: 'e4ec5f782f5d1d99801021aff8419db7',
