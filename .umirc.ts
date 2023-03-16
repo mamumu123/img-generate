@@ -24,6 +24,11 @@ export default defineConfig({
       path: '/',
       component: './',
     },
+    {
+      name: '节日氛围',
+      path: '/flower',
+      component: './flower',
+    },
 
     // {
     //   name: '权限演示',
