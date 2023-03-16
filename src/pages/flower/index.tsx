@@ -1,46 +1,50 @@
-// import { TAB_KEY_LIST, TAB_LABEL, TRAITS, keyImg } from '@/constants/traits';
-// import { isWeChat, loadImage, getRandomTraits } from '@/utils';
+import {
+  TAB_KEY_LIST_NATIONAL_IMG,
+  TAB_LABEL,
+  NATIONAL_IMG,
+  keyImg,
+} from '@/constants/ornament';
 import { download } from '@/utils/download';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Upload, UploadProps } from 'antd';
-import { UploadChangeParam, UploadFile } from 'antd/es/upload';
-// import { Button, Col, message, Row, Tabs } from 'antd';
+import { Button, Col, message, Row, Tabs, Upload } from 'antd';
+import { RcFile } from 'antd/es/upload';
 import { useEffect, useRef, useState } from 'react';
 import styles from './index.less';
-import { beforeUpload, getBase64 } from './utils';
+import { getBase64 } from './utils';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { loadImage } from '@/utils';
 
 const HomePage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // 选择的图片，用来拼接
-  const [imgSelect] = useState('');
+  const [imgSelect, setImgSelect] = useState('');
+  console.log('imgSelect', imgSelect);
 
   // 用户头像
-  const [imageUrl, setImageUrl] = useState<string>();
+  const [imageUrl, setImageUrl] = useState<string>('');
+  console.log('imageUrl', imageUrl);
   const [loading, setLoading] = useState(false);
 
-  const handleChange: UploadProps['onChange'] = (
-    info: UploadChangeParam<UploadFile>,
-  ) => {
-    console.log('xxxx', info);
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
+  const beforeUpload = (file: RcFile) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('You can only upload JPG/PNG file!');
     }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj!, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
+    setLoading(true);
+
+    getBase64(file, (url) => {
+      setLoading(false);
+      setImageUrl(url);
+    });
+
+    return false;
   };
 
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
+      <div style={{ marginTop: 8 }}>点击上传</div>
     </div>
   );
 
@@ -54,85 +58,64 @@ const HomePage: React.FC = () => {
       if (!ctx) {
         return;
       }
-      //     const images = ['traits/Lian.jpg'];
+      const images = [imageUrl, imgSelect].filter((i) => !!i);
       ctx?.clearRect(0, 0, 200, 200);
       ctx.beginPath();
       ctx.rect(0, 0, 200, 200);
       ctx.fillStyle = '#fff';
       ctx.fill();
-      //     TAB_KEY_LIST.forEach((tab: keyImg) => {
-      //       let result = '';
-      //       const isSelect = imgSelect[tab];
-      //       if (isSelect) {
-      //         result =
-      //           TRAITS[tab].find((item) => item.key === imgSelect[tab])?.img || '';
-      //         images.push(result);
-      //       }
-      //     });
-      //     images.push(
-      //       images.splice(
-      //         images.findIndex((img) => img.includes('Faxing')),
-      //         1,
-      //       )[0],
-      //     );
-      //     const imagesObj = await Promise.all(images.map(loadImage));
-      //     imagesObj.forEach((item) => {
-      //       ctx?.drawImage(item, 0, 0, 200, 200);
-      //     });
+      const imagesObj = await Promise.all(images.map(loadImage));
+      imagesObj.forEach((item) => {
+        ctx?.drawImage(item, 0, 0, 200, 200);
+      });
     })();
-  }, [imgSelect]);
+  }, [imgSelect, imageUrl]);
 
-  // const onClickImg = (tab: keyImg, it: string) => {
-  //   setImgSelect((per) => ({
-  //     ...per,
-  //     [tab]: it,
-  //   }));
-  // };
+  const onClickImg = (tab: keyImg, it: string) => {
+    setImgSelect(it);
+  };
 
-  // console.log(imgSelect);
+  const items = TAB_KEY_LIST_NATIONAL_IMG.map((tab) => ({
+    key: tab,
+    label: TAB_LABEL[tab],
+    children: (
+      <Row>
+        {NATIONAL_IMG[tab].map((it) => (
+          <Col span={8} key={it.key}>
+            <div
+              className={styles.img__container}
+              onClick={() => onClickImg(tab, it.img)}
+              style={{
+                cursor: 'pointer',
+                borderRadius: 5,
+                border: `2px solid ${
+                  imgSelect === it.key ? 'yellowgreen' : '#000'
+                }  `,
+              }}
+            >
+              <img src={it.img} alt="" />
+            </div>
+          </Col>
+        ))}
+      </Row>
+    ),
+  }));
 
-  // const items = TAB_KEY_LIST.map((tab) => ({
-  //   key: tab,
-  //   label: TAB_LABEL[tab],
-  //   children: (
-  //     <Row>
-  //       {TRAITS[tab].map((it) => (
-  //         <Col span={8} key={it.key}>
-  //           <div
-  //             className={styles.img__container}
-  //             onClick={() => onClickImg(tab, it.key)}
-  //             style={{
-  //               cursor: 'pointer',
-  //               borderRadius: 5,
-  //               border: `2px solid ${
-  //                 imgSelect[tab] === it.key ? 'yellowgreen' : '#000'
-  //               }  `,
-  //             }}
-  //           >
-  //             <img src={it.img} alt="" />
-  //           </div>
-  //         </Col>
-  //       ))}
-  //     </Row>
-  //   ),
-  // }));
-
-  // const [currentTab, setCurrentTab] = useState<keyImg>('Faxing');
+  // const [currentTab, setCurrentTab] = useState<keyImg>('national');
 
   // const onChange = (tab: string) => {
-  //   console.log('currentTab', currentTab, 'tab', tab);
   //   setCurrentTab(tab as keyImg);
   // };
 
   const left = () => {
     return (
       <div className={styles.left}>
-        {/* <Tabs
+        <Tabs
           tabPosition="left"
           defaultActiveKey="1"
           items={items}
-          onChange={onChange}
-        /> */}
+          // onChange={onChange}
+        />
       </div>
     );
   };
@@ -146,7 +129,6 @@ const HomePage: React.FC = () => {
           className="avatar-uploader"
           showUploadList={false}
           beforeUpload={beforeUpload}
-          onChange={handleChange}
         >
           {imageUrl ? (
             <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
