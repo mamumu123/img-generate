@@ -58,12 +58,12 @@ const HomePage: React.FC = () => {
       if (!ctx) {
         return;
       }
-      const images = [imageUrl, imgSelect].filter((i) => !!i);
       ctx?.clearRect(0, 0, 200, 200);
       ctx.beginPath();
       ctx.rect(0, 0, 200, 200);
       ctx.fillStyle = '#fff';
       ctx.fill();
+      const images = [imageUrl, imgSelect].filter((i) => !!i);
       const imagesObj = await Promise.all(images.map(loadImage));
       imagesObj.forEach((item) => {
         ctx?.drawImage(item, 0, 0, 200, 200);
