@@ -15,10 +15,6 @@ export default defineConfig({
     title: '@umijs/max',
   },
   routes: [
-    // {
-    //   path: '/',
-    //   redirect: '/home',
-    // },
     {
       name: '头像拼接',
       path: '/',
@@ -29,17 +25,12 @@ export default defineConfig({
       path: '/flower',
       component: './flower',
     },
+    {
+      name: '颜色选取',
+      path: '/color',
+      component: './color',
+    },
 
-    // {
-    //   name: '权限演示',
-    //   path: '/access',
-    //   component: './Access',
-    // },
-    // {
-    //   name: ' CRUD 示例',
-    //   path: '/table',
-    //   component: './Table',
-    // },
     { component: '@/pages/' },
   ],
   analytics: {

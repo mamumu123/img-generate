@@ -101,11 +101,12 @@ const HomePage: React.FC = () => {
     ),
   }));
 
-  // const [currentTab, setCurrentTab] = useState<keyImg>('national');
+  const [currentTab, setCurrentTab] = useState<keyImg>('national');
 
-  // const onChange = (tab: string) => {
-  //   setCurrentTab(tab as keyImg);
-  // };
+  const onChange = (tab: string) => {
+    console.log('currentTab', currentTab);
+    setCurrentTab(tab as keyImg);
+  };
 
   const left = () => {
     return (
@@ -114,7 +115,7 @@ const HomePage: React.FC = () => {
           tabPosition="left"
           defaultActiveKey="1"
           items={items}
-          // onChange={onChange}
+          onChange={onChange}
         />
       </div>
     );

@@ -8,6 +8,7 @@ export const loadImage: (src: string) => Promise<CanvasImageSource> = (
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => reject(null);
+    img.crossOrigin = '';
     img.src = src;
   });
 
