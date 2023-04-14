@@ -1,6 +1,10 @@
 ## 背景
 
-> 一句话，用 `canvas.drawImage` 实现头像拼接，图片增加装饰，获取图片点击处颜色等功能；
+> 一句话描述，用 `canvas.drawImage` 实现头像拼接，图片增加装饰，获取图片点击处颜色等功能；
+
+### 关键词
+
+canvas、drawImage、 demo、头像拼接、颜色选取
 
 ### 项目背景
 
@@ -9,8 +13,6 @@
 在玩蛋仔派对的时候，觉得换肤很有意思。在逛开源社区的时候，看到了用 `canvas.drawImage` 实现同样效果的项目（[gclx-official](https://github.com/lxdao-official/gclx-official)）。
 
 继续逛下去发现有很多场景的实现原理都是相同的。
-
-头像增加挂饰
 
 ### drawImage
 
@@ -49,13 +51,15 @@ const loadImage = (src: string) =>
 ctx?.drawImage(item, 0, 0, 200, 200);
 ```
 
-![](3.png)
+![3.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/be07ab2e74434956b7a66ceb943c1733~tplv-k3u1fbpfcp-watermark.image?)
 
 这样，一张图片就被画到画布上面了。
 
 ## 拼接头像
 
-体验地址：[头像拼接](https://mamumu123.github.io/img-generate/) ![](2.png)
+体验地址：[头像拼接](https://mamumu123.github.io/img-generate/)
+
+![2.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/151cfb84e899446d96862ed1d83b8985~tplv-k3u1fbpfcp-watermark.image?)
 
 如果要实现拼接头像的功能，就是将几张图片叠加绘制到画布上去。
 
@@ -79,7 +83,7 @@ imagesObj.forEach((item) => {
 
 功能描述：就是在节日的时候，可以在头像上增加一些节日的装饰，增加节日气氛。体验地址：[节日气氛](https://mamumu123.github.io/img-generate/flower)
 
-![](4.png)
+![4.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0b00291bb54f4874a404c6e1b36499fa~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 核心代码
 
@@ -95,7 +99,9 @@ imagesObj.forEach((item) => {
 
 ## 颜色获取
 
-功能描述：每次点击图片，背景色都会变成点击部分的颜色。截图： ![](./5.png)
+功能描述：每次点击图片，背景色都会变成点击部分的颜色。截图：
+
+![5.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/341742877df14192a6b242af8dcc9a56~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 核心代码
 
@@ -124,3 +130,13 @@ function getColor(x: number, y: number) {
 ## 参考地址
 
 [HTML canvas drawImage() 方法](https://www.runoob.com/tags/canvas-drawimage.html)
+
+## 项目地址：
+
+[github](https://github.com/mamumu123/img-generate)
+
+觉得有点意思就给个 star 吧。
+
+## 体验地址：
+
+[头像拼接](https://mamumu123.github.io/img-generate/)
