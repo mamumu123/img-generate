@@ -15,6 +15,7 @@
     "@ant-design/pro-components": "^2.0.1",
     "@umijs/max": "^4.0.56",
     "antd": "^5.0.0",
+    "react-cropper": "^2.3.3",
     "ts-lodash": "^4.0.11"
   },
   "devDependencies": {

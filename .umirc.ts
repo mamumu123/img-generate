@@ -16,6 +16,11 @@ export default defineConfig({
   },
   routes: [
     {
+      name: '图片裁剪',
+      path: '/cropper',
+      component: './cropper',
+    },
+    {
       name: '头像拼接',
       path: '/',
       component: './',
