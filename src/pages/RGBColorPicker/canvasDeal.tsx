@@ -13,6 +13,11 @@ import {
   flipSideToSide,
   leftRotate,
   rightRotate,
+  toGrey,
+  toBlackAndWhite,
+  sharpen,
+  marginSharpen,
+  toGaussianBlur,
 } from '@/utils/imageUtil';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { download } from '@/utils/download';
@@ -27,6 +32,11 @@ const OP = {
   flipSideToSide: 'flipSideToSide',
   leftRotate: 'leftRotate',
   rightRotate: 'rightRotate',
+  toGrey: 'toGrey',
+  toBlackAndWhite: 'toBlackAndWhite',
+  sharpen: 'sharpen',
+  marginSharpen: 'marginSharpen',
+  toGaussianBlur: 'toGaussianBlur',
 };
 
 function ColorGrid() {
@@ -135,6 +145,23 @@ function ColorGrid() {
       nData = flipUpsideDown(nData!);
     }
 
+    if (checkedValues.includes(OP.toGrey)) {
+      nData = toGrey(nData!);
+    }
+
+    if (checkedValues.includes(OP.toBlackAndWhite)) {
+      nData = toBlackAndWhite(nData!);
+    }
+    if (checkedValues.includes(OP.sharpen)) {
+      nData = sharpen(nData!);
+    }
+    if (checkedValues.includes(OP.marginSharpen)) {
+      nData = marginSharpen(nData!);
+    }
+    if (checkedValues.includes(OP.toGaussianBlur)) {
+      nData = toGaussianBlur(nData!);
+    }
+
     setNewData(nData);
   };
 
@@ -172,19 +199,38 @@ function ColorGrid() {
             <Card>
               <Checkbox.Group style={{ width: '100%' }} onChange={onChange}>
                 <Row>
-                  <Col span={8}>
+                  {/* 滤镜 */}
+                  <Col span={6}>
                     <Checkbox value={OP.redFilter}>红色滤镜</Checkbox>
                   </Col>
-                  <Col span={8}>
+                  <Col span={6}>
                     <Checkbox value={OP.greenFilter}>绿色滤镜</Checkbox>
                   </Col>
-                  <Col span={8}>
+                  <Col span={6}>
                     <Checkbox value={OP.blurFilter}>蓝色滤镜</Checkbox>
                   </Col>
-                  <Col span={8}>
+                  <Col span={6}>
+                    <Checkbox value={OP.toGrey}>灰化</Checkbox>
+                  </Col>
+                  <Col span={6}>
+                    <Checkbox value={OP.toBlackAndWhite}>黑白化</Checkbox>
+                  </Col>
+                  <Col span={6}>
+                    <Checkbox value={OP.sharpen}>锐化</Checkbox>
+                  </Col>
+                  <Col span={6}>
+                    <Checkbox value={OP.marginSharpen}>边缘锐化</Checkbox>
+                  </Col>
+                  <Col span={6}>
+                    <Checkbox value={OP.toGaussianBlur} disabled>
+                      高斯模糊
+                    </Checkbox>
+                  </Col>
+                  {/* 翻转 */}
+                  <Col span={6}>
                     <Checkbox value={OP.flipSideToSide}>左右翻转</Checkbox>
                   </Col>
-                  <Col span={8}>
+                  <Col span={6}>
                     <Checkbox value={OP.flipUpsideDown}>上下翻转</Checkbox>
                   </Col>
                 </Row>

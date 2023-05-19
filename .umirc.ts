@@ -12,7 +12,7 @@ export default defineConfig({
   publicPath: '/img-generate/',
   request: {},
   layout: {
-    title: '@umijs/max',
+    title: '工具中心',
   },
   routes: [
     {
