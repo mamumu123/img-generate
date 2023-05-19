@@ -1,6 +1,6 @@
 import { PageContainer } from '@ant-design/pro-components';
 import { Col, Row, Input, Checkbox, Card, Button } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './styles.less';
 import { useLocalStorageState } from 'ahooks';
 import { getImageSize } from '@/utils/image';
@@ -22,12 +22,13 @@ import {
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { download } from '@/utils/download';
 
-const LENA_PATH = 'https://upload.wikimedia.org/wikipedia/zh/3/34/Lenna.jpg';
+const LENA_PATH =
+  'https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/69b1afc1723c4233ba09e37c845973f1~tplv-k3u1fbpfcp-watermark.image';
 
 const OP = {
-  redFilter: 'redFilter',
-  greenFilter: 'greenFilter',
-  blurFilter: 'blurFilter',
+  toRed: 'toRed',
+  toGreen: 'toGreen',
+  toBlue: 'toBlue',
   flipUpsideDown: 'flipUpsideDown',
   flipSideToSide: 'flipSideToSide',
   leftRotate: 'leftRotate',
@@ -37,41 +38,52 @@ const OP = {
   sharpen: 'sharpen',
   marginSharpen: 'marginSharpen',
   toGaussianBlur: 'toGaussianBlur',
+  reset: 'reset',
+};
+
+const methodList = {
+  toRed,
+  toGreen,
+  toBlue,
+  flipUpsideDown,
+  flipSideToSide,
+  toGrey,
+  toBlackAndWhite,
+  sharpen,
+  marginSharpen,
+  toGaussianBlur,
 };
 
 function ColorGrid() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const newCanvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [newData, setNewData] = useState<ImageData | null>();
-  console.log('newData', newData);
-
-  const [oldData, setOldData] = useState<ImageData | null>();
-
+  // origin url
   const [url, setUrl] = useLocalStorageState<string>('url', {
     defaultValue: LENA_PATH,
   });
-  console.log('url', url);
 
+  const newCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [newData, setNewData] = useState<ImageData | null>();
+  const [originData, setOriginData] = useState<ImageData | null>();
+
+  // get init data
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !url) {
-      return;
-    }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
+    if (!url) {
       return;
     }
 
     getImageSize(url)
       .then(async ({ width, height }) => {
+        const data = await loadImage(url);
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
         canvas.width = width;
         canvas.height = height;
-        const data = await loadImage(url);
+        if (!ctx) {
+          return;
+        }
         ctx.drawImage(data, 0, 0, width, height);
-
         const imageData = ctx.getImageData(0, 0, width, height);
-        setOldData(imageData);
+        setOriginData(imageData);
         setNewData(imageData);
       })
       .catch((error) => {
@@ -79,6 +91,7 @@ function ColorGrid() {
       });
   }, [url]);
 
+  // render canvas by imageData
   useEffect(() => {
     const canvas = newCanvasRef.current;
     if (!canvas || !url) {
@@ -88,6 +101,7 @@ function ColorGrid() {
     if (!ctx) {
       return;
     }
+    console.log('newData', newData);
 
     if (newData) {
       canvas.width = newData.width;
@@ -106,82 +120,37 @@ function ColorGrid() {
   // 这里返回一个数组，每个数组中的值都是一个效果；是一个结果
   const onChange = (checkedValues: CheckboxValueType[]) => {
     console.log('checked = ', checkedValues);
-    const canvas = canvasRef.current;
-    if (!canvas || !url || !oldData) {
+    if (!url || !originData) {
       return;
     }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-    let nData: ImageData | null = oldData;
 
-    // TODO: 名字一致，直接调用
-    if (checkedValues.includes(OP.redFilter)) {
-      nData = toRed(nData);
-    }
+    let nData: ImageData = originData;
 
-    if (checkedValues.includes(OP.greenFilter)) {
-      nData = toGreen(nData!);
-    }
+    const newData = checkedValues.reduce((sum, item) => {
+      const target = item as keyof typeof methodList;
+      nData = methodList[target]?.(sum) || nData;
+      return nData;
+    }, nData);
 
-    if (checkedValues.includes(OP.blurFilter)) {
-      nData = toBlue(nData!);
-    }
-
-    if (checkedValues.includes(OP.blurFilter)) {
-      nData = toBlue(nData!);
-    }
-
-    if (checkedValues.includes(OP.blurFilter)) {
-      nData = toBlue(nData!);
-    }
-
-    if (checkedValues.includes(OP.flipSideToSide)) {
-      nData = flipSideToSide(nData!);
-    }
-
-    if (checkedValues.includes(OP.flipUpsideDown)) {
-      nData = flipUpsideDown(nData!);
-    }
-
-    if (checkedValues.includes(OP.toGrey)) {
-      nData = toGrey(nData!);
-    }
-
-    if (checkedValues.includes(OP.toBlackAndWhite)) {
-      nData = toBlackAndWhite(nData!);
-    }
-    if (checkedValues.includes(OP.sharpen)) {
-      nData = sharpen(nData!);
-    }
-    if (checkedValues.includes(OP.marginSharpen)) {
-      nData = marginSharpen(nData!);
-    }
-    if (checkedValues.includes(OP.toGaussianBlur)) {
-      nData = toGaussianBlur(nData!);
-    }
-
-    setNewData(nData);
+    setNewData(newData);
   };
 
   // 这里是每次都会触发一个操作，是一个动作；
   const perChange = (op: string) => {
-    const canvas = newCanvasRef.current;
-    if (!canvas || !url || !newData) {
+    if (!url || !newData) {
       return;
     }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-    let nData: ImageData | null = newData;
+    let nData: ImageData = newData;
 
     if (op === OP.leftRotate) {
-      nData = leftRotate(nData!);
+      nData = leftRotate(nData) || nData;
     }
     if (op === OP.rightRotate) {
-      nData = rightRotate(nData!);
+      nData = rightRotate(nData) || nData;
+    }
+    // 清空
+    if (op === OP.reset) {
+      nData = originData!;
     }
     setNewData(nData);
   };
@@ -190,66 +159,61 @@ function ColorGrid() {
     <PageContainer>
       <div className={styles.container}>
         <Row className={styles.row__container}>
-          <Col span={12} className={styles.block__container}>
-            <canvas ref={canvasRef} />
-          </Col>
-          <Col span={12} className={styles.block__container}>
+          <Col span={24}>
             url:
             <Input value={url || LENA_PATH} onChange={handleChange} />
             <Card>
               <Checkbox.Group style={{ width: '100%' }} onChange={onChange}>
                 <Row>
                   {/* 滤镜 */}
-                  <Col span={6}>
-                    <Checkbox value={OP.redFilter}>红色滤镜</Checkbox>
+                  <Col span={4}>
+                    <Checkbox value={OP.toRed}>红色滤镜</Checkbox>
                   </Col>
-                  <Col span={6}>
-                    <Checkbox value={OP.greenFilter}>绿色滤镜</Checkbox>
+                  <Col span={4}>
+                    <Checkbox value={OP.toGreen}>绿色滤镜</Checkbox>
                   </Col>
-                  <Col span={6}>
-                    <Checkbox value={OP.blurFilter}>蓝色滤镜</Checkbox>
+                  <Col span={4}>
+                    <Checkbox value={OP.toBlue}>蓝色滤镜</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.toGrey}>灰化</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.toBlackAndWhite}>黑白化</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.sharpen}>锐化</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.marginSharpen}>边缘锐化</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.toGaussianBlur} disabled>
                       高斯模糊
                     </Checkbox>
                   </Col>
                   {/* 翻转 */}
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.flipSideToSide}>左右翻转</Checkbox>
                   </Col>
-                  <Col span={6}>
+                  <Col span={4}>
                     <Checkbox value={OP.flipUpsideDown}>上下翻转</Checkbox>
                   </Col>
                 </Row>
               </Checkbox.Group>
-            </Card>
-            <Card>
-              <Button onClick={() => perChange(OP.leftRotate)}>向左旋转</Button>
-              <Button onClick={() => perChange(OP.rightRotate)}>
-                向右旋转
-              </Button>
-            </Card>
-            <Card>
-              <Button onClick={() => download(newCanvasRef)}>下载</Button>
+              <div>
+                <Button onClick={() => perChange(OP.leftRotate)}>
+                  向左旋转
+                </Button>
+                <Button onClick={() => perChange(OP.rightRotate)}>
+                  向右旋转
+                </Button>
+                <Button onClick={() => download(newCanvasRef)}>下载</Button>
+                <Button onClick={() => perChange(OP.reset)}>清空效果</Button>
+              </div>
             </Card>
           </Col>
-        </Row>
-        <Row className={styles.row__container}>
-          <Col span={12} className={styles.block__container}></Col>
-          <Col span={12} className={styles.block__container}>
+          <Col span={24} className={styles.block__container}>
             <canvas ref={newCanvasRef} />
           </Col>
         </Row>
