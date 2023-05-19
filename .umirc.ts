@@ -35,6 +35,16 @@ export default defineConfig({
       path: '/color',
       component: './color',
     },
+    {
+      name: '三原色',
+      path: '/red',
+      component: './RGBColorPicker',
+    },
+    {
+      name: 'Canvas 修改',
+      path: '/getImageData',
+      component: './RGBColorPicker/canvasDeal',
+    },
 
     { component: '@/pages/' },
   ],
