@@ -15,6 +15,7 @@ import {
   rightRotate,
 } from '@/utils/imageUtil';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
+import { download } from '@/utils/download';
 
 const LENA_PATH = 'https://upload.wikimedia.org/wikipedia/zh/3/34/Lenna.jpg';
 
@@ -194,6 +195,9 @@ function ColorGrid() {
               <Button onClick={() => perChange(OP.rightRotate)}>
                 向右旋转
               </Button>
+            </Card>
+            <Card>
+              <Button onClick={() => download(newCanvasRef)}>下载</Button>
             </Card>
           </Col>
         </Row>
