@@ -2,7 +2,7 @@
 
 ### 本文介绍
 
-本文通过 canvas 的 ImageData， 实现了一个基础的图像处理工具。可以在浏览器端对图片进行左右翻转，滤镜，尺寸修改等操作。
+本文通过 canvas 的 ImageData， 实现了一个基础的图像处理工具。可以在浏览器对图片进行左右镜像、左右旋转、颜色滤镜、尺寸修改等操作。
 
 ### 关键词
 
@@ -10,9 +10,7 @@ imageData、canvas、 图像处理、滤镜
 
 ### 功能介绍
 
-逛 github 热榜的时候看到一个项目[visualization-collection](http://hepengwei.cn/#/gameImage),里面有很多的前端视觉效果。其中，图片处理部分（[体验地址](http://hepengwei.cn/#/gameImage)）比较有意思,对于熟悉图片处理比较有用，所以尝试进行学习和理解。
-
-实现了对图片的简单滤镜、翻转（左右，上下）
+逛 github 热榜的时候看到一个项目 [visualization-collection](http://hepengwei.cn/#/gameImage), 里面有很多的前端视觉效果。其中有一个图片处理的项目（[体验地址](http://hepengwei.cn/#/gameImage)），实现了对图片的滤镜、翻转、旋转等功能，感觉是个很有用的功能，所以尝试进行学习和理解。
 
 ![截屏2023-05-17 16.05.46.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/29a572042eee41008d85395be019d9b7~tplv-k3u1fbpfcp-watermark.image?)
 
@@ -75,7 +73,7 @@ canvas.toBlob((blob) => {
 
 ### Canvas 修改（getImageData）
 
-在知道 Image 和 Canvas 如何转化以后，我们接下来就看如何对 Canvas 进行修改。这里就需要再了解一个 API [getImageData](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/getImageData)。
+在知道 Image 和 Canvas 如何转化以后，接下来就看如何对 Canvas 进行修改。这里就需要再了解一个 API [getImageData](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/getImageData)。
 
 #### ImageData
 
@@ -124,20 +122,18 @@ console.log(imageData);
 
 体验地址: [三原色合成](https://mamumu123.github.io/img-generate/red)
 
-那我们修改 ImageData，就可以实现图像处理。如果我们想修改到原图，就调用 `putImageData`；如果我们想要生成一个新的 Image，做对比。就使用 `ImageData` 新建一个 Canvas。
+那我们通过修改 ImageData，就可以实现图像处理。如果我们想修改到原图，就调用 `putImageData`；如果我们想要生成一个新的 Image，就使用 `ImageData` 新建一个 Canvas。
 
 ## 基础操作效果实现
 
 通过对 `ImageData` 的数据变换，我们可以实现一些基础的图像处理：
 
-- 基本滤镜：单色滤镜（红色滤镜、）
-- 旋转、翻转
+- 基本滤镜：单色滤镜
+- 旋转、镜像
 - 灰化
 - 锐化
-- 高斯模糊
-- PNG、JPEG（？待定）
 
-我们来挑取一些进行实现
+我们来挑取一些进行实现。
 
 ### 红色滤镜
 
@@ -160,7 +156,7 @@ const toRed = (imageData: ImageData) => {
 };
 ```
 
-一个像素对应 4 个值，红、绿、蓝、透明度通道。对于每一个像素，我们就需要设置四个元素的值。
+一个像素对应 4 个通道，红、绿、蓝、透明度通道。对于每一个像素，我们就需要设置四个元素的值。
 
 ```js
 // startIndex 对应的则是 a[y][x] 的像素点
@@ -173,7 +169,9 @@ newImgData[startIndex + 2] = 0;
 newImgData[startIndex + 3] = data[startIndex + 3];
 ```
 
-效果如图： ![截屏2023-05-20 10.01.42.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b1f5c64fdd894e9d827347270b48a754~tplv-k3u1fbpfcp-watermark.image?)
+效果如图：
+
+![截屏2023-05-20 10.01.42.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b1f5c64fdd894e9d827347270b48a754~tplv-k3u1fbpfcp-watermark.image?)
 
 同理，蓝色滤镜，黄色滤镜，红蓝色滤镜等都是一样的实现逻辑，只需要保留对应颜色通道的数值。将其他颜色通道的数字设置为 0 就可以了。
 
@@ -198,7 +196,9 @@ newImgData[startIndex + 2] = avgColor;
 newImgData[startIndex + 3] = data[startIndex + 3];
 ```
 
-效果如下： ![截屏2023-05-20 11.09.40.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5c9b3cdfc5b94c16a6bb1d8ac4ffe459~tplv-k3u1fbpfcp-watermark.image?)
+效果如下：
+
+![截屏2023-05-20 11.09.40.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5c9b3cdfc5b94c16a6bb1d8ac4ffe459~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 左右镜像
 
@@ -215,7 +215,9 @@ newImgData[startIndex + 2] = data[(y * width + width - x - 1) * 4 + 2];
 newImgData[startIndex + 3] = data[(y * width + width - x - 1) * 4 + 3];
 ```
 
-效果如图： ![截屏2023-05-20 10.21.24.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/323c22578a9e4a33affc744d04cc3b20~tplv-k3u1fbpfcp-watermark.image?)
+效果如图：
+
+![截屏2023-05-20 10.21.24.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/323c22578a9e4a33affc744d04cc3b20~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 上下镜像
 
@@ -229,7 +231,9 @@ newImgData[startIndex + 2] = data[((height - y - 1) * width + x) * 4 + 2];
 newImgData[startIndex + 3] = data[((height - y - 1) * width + x) * 4 + 3];
 ```
 
-效果如图： ![截屏2023-05-20 10.21.37.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1a82d77197334833ba4e76e7c27a95e8~tplv-k3u1fbpfcp-watermark.image?)
+效果如图：
+
+![截屏2023-05-20 10.21.37.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1a82d77197334833ba4e76e7c27a95e8~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 向左旋转 90 度
 
@@ -252,7 +256,9 @@ newImgData[startIndex + 2] = data[(y * width + width - x - 1) * 4 + 2];
 newImgData[startIndex + 3] = data[(y * width + width - x - 1) * 4 + 3];
 ```
 
-效果如下： ![截屏2023-05-20 10.59.38.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2399da670f5a429b9161d4cf803ae659~tplv-k3u1fbpfcp-watermark.image?)
+效果如下：
+
+![截屏2023-05-20 10.59.38.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2399da670f5a429b9161d4cf803ae659~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 向右旋转 90 度
 
@@ -275,7 +281,9 @@ newImgData[startIndex + 2] = data[((height - y - 1) * width + x) * 4 + 2];
 newImgData[startIndex + 3] = data[((height - y - 1) * width + x) * 4 + 3];
 ```
 
-效果如下： ![截屏2023-05-20 10.59.00.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ff57b9afa22c4c3cb245831609685bcf~tplv-k3u1fbpfcp-watermark.image?)
+效果如下：
+
+![截屏2023-05-20 10.59.00.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ff57b9afa22c4c3cb245831609685bcf~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 锐化
 
@@ -315,13 +323,14 @@ for (let i = 0; i < 3; i++) {
 newImgData[startIndex + 3] = data[startIndex + 3];
 ```
 
-效果如下： ![截屏2023-05-20 11.12.23.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f62b86585341487e95105d81d4f15a0c~tplv-k3u1fbpfcp-watermark.image?)
+效果如下：
 
-\*\*\* TODO 整体功能就是 上传图片 -> 图片处理 -> 下载所以我会先进行代码的分析和理解，然后试着在这个基础上，进行改造。更适合使用。
+![截屏2023-05-20 11.12.23.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f62b86585341487e95105d81d4f15a0c~tplv-k3u1fbpfcp-watermark.image?)
 
-- [ ] 实时看到预览效果
-- [ ] 增加 demo ,增加 url 输入（不一定是线上的）
-- [ ] 不同的实现方式
+## TODO
+
+- [x] 实时看到预览效果
+- [x] 增加图像 demo, 支持输入图片 URL。
 
 ## 参考
 
