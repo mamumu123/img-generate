@@ -296,16 +296,6 @@ function CutImage() {
                 <Button onClick={() => perChange(OP.rightRotate)}>
                   向右旋转
                 </Button>
-                <Button
-                  onClick={() =>
-                    downloadCanvasPart(
-                      canvasRef.current!,
-                      startCrop ? [cx, cy, cWidth, cHeight] : [],
-                    )
-                  }
-                >
-                  下载
-                </Button>
                 <Button onClick={() => perChange(OP.reset)}>清空效果</Button>
               </div>
             </Card>
@@ -356,6 +346,17 @@ function CutImage() {
                 onChange={(e) => setHeight(Number(e.target.value))}
               />
             </Form.Item>
+
+            <Button
+              onClick={() =>
+                downloadCanvasPart(
+                  canvasRef.current!,
+                  startCrop ? [cx, cy, cWidth, cHeight] : [],
+                )
+              }
+            >
+              下载
+            </Button>
           </Col>
         </Row>
       </div>
