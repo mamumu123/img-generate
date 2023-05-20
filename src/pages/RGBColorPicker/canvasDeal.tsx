@@ -160,9 +160,8 @@ function ColorGrid() {
       <div className={styles.container}>
         <Row className={styles.row__container}>
           <Col span={24}>
-            url:
-            <Input value={url || LENA_PATH} onChange={handleChange} />
             <Card>
+              <Input value={url || LENA_PATH} onChange={handleChange} />
               <Checkbox.Group style={{ width: '100%' }} onChange={onChange}>
                 <Row>
                   {/* 滤镜 */}

@@ -2,7 +2,7 @@
 
 ### 本文介绍
 
-本文
+本文通过 canvas 的 ImageData， 实现了一个基础的图像处理工具。可以在浏览器端对图片进行左右翻转，滤镜，尺寸修改等操作。
 
 ### 关键词
 
@@ -122,7 +122,7 @@ console.log(imageData);
 
 通过四个通道数值的变化，就可以描述像素点的颜色值。 ![截屏2023-05-19 11.58.52.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/044c417bbdb84e64a7457fb0bf862155~tplv-k3u1fbpfcp-watermark.image?)
 
-体验地址: TODO
+体验地址: [三原色合成](https://mamumu123.github.io/img-generate/red)
 
 那我们修改 ImageData，就可以实现图像处理。如果我们想修改到原图，就调用 `putImageData`；如果我们想要生成一个新的 Image，做对比。就使用 `ImageData` 新建一个 Canvas。
 
@@ -141,226 +141,181 @@ console.log(imageData);
 
 ### 红色滤镜
 
-### 左旋转
+红色滤镜,就是在 `RGB` 通道中仅保留红色通道的数值,而将其他颜色通道的数值设置为 0。
 
-### 左翻转
+```ts
+// 红色滤镜
+const toRed = (imageData: ImageData) => {
+  const { data, width, height } = imageData;
+  // 新建一个数组，长度和 imageData 保持一致。
+  const newImgData = new Uint8ClampedArray(data.length);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      // TODO something
+    }
+  }
+  // 新建一个 ImageData 返回
+  return new ImageData(newImgData, width, height);
+};
+```
+
+一个像素对应 4 个值，红、绿、蓝、透明度通道。对于每一个像素，我们就需要设置四个元素的值。
+
+```js
+// startIndex 对应的则是 a[y][x] 的像素点
+const startIndex = (y * width + x) * 4;
+// 只保留 R 通道
+newImgData[startIndex] = data[startIndex];
+// G 和 B 通道设置为 0
+newImgData[startIndex + 1] = 0;
+newImgData[startIndex + 2] = 0;
+newImgData[startIndex + 3] = data[startIndex + 3];
+```
+
+效果如图： ![截屏2023-05-20 10.01.42.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b1f5c64fdd894e9d827347270b48a754~tplv-k3u1fbpfcp-watermark.image?)
+
+同理，蓝色滤镜，黄色滤镜，红蓝色滤镜等都是一样的实现逻辑，只需要保留对应颜色通道的数值。将其他颜色通道的数字设置为 0 就可以了。
 
 ### 灰化
 
+图片的灰化是指将彩色图片转换为黑白灰度图像的过程。将彩色图片转换为灰度图像的过程通常使用加权平均法来计算每个像素的亮度值。加权平均法将每个像素的红、绿、蓝三个通道的值按照一定的权重进行加权平均，得到一个亮度值。通常使用以下公式来计算每个像素的亮度值：
+
+```js
+L = 0.299 * R + 0.587 * G + 0.114 * B;
+```
+
+```js
+const startIndex = (y * width + x) * 4;
+// 设置为中间值
+const avgColor =
+  0.299 * data[startIndex] +
+  0.587 * data[startIndex + 1] +
+  data[startIndex + 2] * 0.114;
+newImgData[startIndex] = avgColor;
+newImgData[startIndex + 1] = avgColor;
+newImgData[startIndex + 2] = avgColor;
+newImgData[startIndex + 3] = data[startIndex + 3];
+```
+
+效果如下： ![截屏2023-05-20 11.09.40.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5c9b3cdfc5b94c16a6bb1d8ac4ffe459~tplv-k3u1fbpfcp-watermark.image?)
+
+### 左右镜像
+
+左右镜像是指将一个图像在左右方向上进行水平翻转，得到新的图像。也就是说，将一个图像按照中心垂直线对称，并将左右两侧完全重合，就可以得到左右镜像。要实现左右镜像，则需要进行位置变换 `a[y][x] = a[y][width - 1 - x]`
+
+```js
+// a[y][x] = a[y][width - 1 - x];
+// xxYxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxYxx
+// startIndex 对应的则是 a[y][x] 的像素点
+const startIndex = (y * width + x) * 4;
+newImgData[startIndex] = data[(y * width + width - x - 1) * 4]; //
+newImgData[startIndex + 1] = data[(y * width + width - x - 1) * 4 + 1];
+newImgData[startIndex + 2] = data[(y * width + width - x - 1) * 4 + 2];
+newImgData[startIndex + 3] = data[(y * width + width - x - 1) * 4 + 3];
+```
+
+效果如图： ![截屏2023-05-20 10.21.24.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/323c22578a9e4a33affc744d04cc3b20~tplv-k3u1fbpfcp-watermark.image?)
+
+### 上下镜像
+
+上下镜像是指将一个图像按照中心水平线对称，并将上下两侧完全重合，从而得到镜像结果。要实现上下镜像，则需要进行位置变换 `a[y][x] = a[height -1 - y][x]`
+
+```js
+const startIndex = (y * width + x) * 4;
+newImgData[startIndex] = data[((height - y - 1) * width + x) * 4];
+newImgData[startIndex + 1] = data[((height - y - 1) * width + x) * 4 + 1];
+newImgData[startIndex + 2] = data[((height - y - 1) * width + x) * 4 + 2];
+newImgData[startIndex + 3] = data[((height - y - 1) * width + x) * 4 + 3];
+```
+
+效果如图： ![截屏2023-05-20 10.21.37.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1a82d77197334833ba4e76e7c27a95e8~tplv-k3u1fbpfcp-watermark.image?)
+
+### 向左旋转 90 度
+
+要实现向左旋转 90 度，则需要进行位置变换 `a[x * height + y] = a[y * width + width - x - 1]`
+
+```js
+/*
+1 2 3    
+4 5 6
+7 8 9
+=》
+3 6 9
+2 5 8
+1 4 7
+*/
+const startIndex = (x * height + y) * 4;
+newImgData[startIndex] = data[(y * width + width - x - 1) * 4];
+newImgData[startIndex + 1] = data[(y * width + width - x - 1) * 4 + 1];
+newImgData[startIndex + 2] = data[(y * width + width - x - 1) * 4 + 2];
+newImgData[startIndex + 3] = data[(y * width + width - x - 1) * 4 + 3];
+```
+
+效果如下： ![截屏2023-05-20 10.59.38.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2399da670f5a429b9161d4cf803ae659~tplv-k3u1fbpfcp-watermark.image?)
+
+### 向右旋转 90 度
+
+要实现向右旋转 90 度，则需要进行位置变换 `a[x * height + y] = a[(height - y - 1) * width + x]`
+
+```js
+/*
+1 2 3    
+4 5 6
+7 8 9
+=》
+7 4 1
+8 5 2
+9 6 3
+*/
+const startIndex = (x * height + y) * 4;
+newImgData[startIndex] = data[((height - y - 1) * width + x) * 4];
+newImgData[startIndex + 1] = data[((height - y - 1) * width + x) * 4 + 1];
+newImgData[startIndex + 2] = data[((height - y - 1) * width + x) * 4 + 2];
+newImgData[startIndex + 3] = data[((height - y - 1) * width + x) * 4 + 3];
+```
+
+效果如下： ![截屏2023-05-20 10.59.00.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ff57b9afa22c4c3cb245831609685bcf~tplv-k3u1fbpfcp-watermark.image?)
+
 ### 锐化
 
-### 高斯模糊
-
-### 左右翻转
-
-对于一个新的像素点，
-
-这个像素要设置四个值
-
-i
-
-+1
-
-i+2
-
-+3
-
-### 上下翻转
-
-### 渲染
-
-## 图片处理
-
-### 基础操作
-
-图片的基础操作，基本都是通过操作图片信息的数据来实现的。
-
-一些公共处理
-
-一些基础知识
-
-rgma, 4 个数据代码一个坐标信息
-
-#### 左右翻转
-
-### 矩形裁剪
-
-###
-
-## 获取图片的原始宽高尺寸
-
-基本思路就是加载图片，然后在加载完成以后返回宽高
+锐化用于增强图像的边缘和细节，使图像更加清晰和鲜明。在数字图像处理中，锐化技术通常通过卷积运算来实现。卷积运算是一种基于滤波器的图像处理技术，它通过将一个滤波器应用于图像的每个像素，来改变图像的亮度和颜色。
 
 ```js
-// 获取图片的原始宽高尺寸
-export const getImageWidthHeight: GetImageWidthHeightFn = (url: string) => {
-  return new Promise(function (resolve, reject) {
-    const image = new Image();
-    image.onload = function () {
-      resolve({ width: image.width, height: image.height });
-    };
-    image.onerror = function () {
-      reject(new Error('load image error'));
-    };
-    image.src = url;
-  });
-};
+// -1 -1 -1
+// -1  9 -1
+// -1 -1 -1
+const kernel = [-1, -1, -1, -1, 9, -1, -1, -1, -1]; // 锐化卷积核
+const newImageData = convolutionMatrix(imageData, kernel);
 ```
 
-## 上传
+卷积矩阵的实现
 
 ```js
-const onUploadChange = (e: any) => {
-  const { files } = e.target;
-  getImgInfo(files);
-};
-```
-
-```js
-files -> FileReader > buffer -> blob -> dataUrl -> imageData
-
-```
-
-```js
-  const getImgInfo = (files: FileList) => {
-    for (let i = 0, l = files.length; i < l; i++) {
-        var reader = new FileReader();
-        reader.onload = function (e: any) {
-            const buffer = e.target.result;
-            const blob = new Blob([buffer]);
-            fileOrBlobToDataURL(blob, function (dataUrl: string | null) {
-                if (dataUrl) {
-                    const image = new Image();
-                        image.onload = function () {
-                        const width = image.width;
-                        const height = image.height;
-                        const imageData = getCanvasImgData(dataUrl, width, height);
-                        if (imageData) {
-                            const imgInfo: ImgInfo = {
-                            name: file.name,
-                            fileType,
-                            size: file.size,
-                            width,
-                            height,
-                            imgUrl: dataUrl,
-                            imageData,
-                            };
-                            setImgInfo(imgInfo);
-                        }
-                    }
-                }
-            }
-        }
-        reader.readAsArrayBuffer(file);
-    }
-
+const startIndex = (y * width + x) * 4;
+for (let i = 0; i < 3; i++) {
+  const index = startIndex + i;
+  // 边缘不处理，直接设置为原始值
+  if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+    newImgData[index] = data[index];
+  } else {
+    // 每个点等于所在的 8 邻域的 3 * 3 矩阵和卷积核（kernel）对应位置相乘再相加
+    newImgData[index] =
+      kernel[0] * data[index - width * 4 - 4] + // 左上角
+      kernel[1] * data[index - width * 4] + // 上方 width * 4 = 一行的数据数量
+      kernel[2] * data[index - width * 4 + 4] +
+      kernel[3] * data[index - 4] + // 左侧
+      kernel[4] * data[index] + // 当前
+      kernel[5] * data[index + 4] +
+      kernel[6] * data[index + width * 4 - 4] +
+      kernel[7] * data[index + width * 4] +
+      kernel[8] * data[index + width * 4 + 4];
   }
+}
+newImgData[startIndex + 3] = data[startIndex + 3];
 ```
 
-```js
-// File或Blob对象转DataURL
-export const fileOrBlobToDataURL = (
-  obj: File | Blob,
-  cb: (result: string | null) => void
-) => {
-  if (!obj) {
-    cb(null);
-    return;
-  }
-  const reader = new FileReader();
-  reader.readAsDataURL(obj);
-  reader.onload = function (e) {
-    if (e.target) {
-      cb(e.target.result as string);
-    } else {
-      cb(null);
-    }
-  };
-};
-```
-
-## 左右翻转
-
-```js
-// 左右翻转
-export const flipSideToSide = (imageData: ImageData) => {
-  if (imageData) {
-    const { data, width, height } = imageData;
-    const newImgData = new Uint8ClampedArray(data.length);
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const startIndex = (y * width + x) * 4;
-        newImgData[startIndex] = data[(y * width + width - x - 1) * 4];
-        newImgData[startIndex + 1] = data[(y * width + width - x - 1) * 4 + 1];
-        newImgData[startIndex + 2] = data[(y * width + width - x - 1) * 4 + 2];
-        newImgData[startIndex + 3] = data[(y * width + width - x - 1) * 4 + 3];
-      }
-    }
-    const newImageData = new ImageData(newImgData, width, height);
-    return newImageData;
-  }
-  return null;
-};
-```
-
-## 导出图片
-
-// imageDataToBlob
-
-````js
-// 获取图片二进制数据
-export const getCanvasImgData = (
-  imgUrl: string,
-  width: number = 0,
-  height: number = 0
-) => {
-  if (imgUrl && width && height) {
-    const img = new Image();
-    img.src = imgUrl;
-    const canvas = document.createElement("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(img, 0, 0, width, height);
-    const imageData = ctx.getImageData(0, 0, width, height) as ImageData;
-    return imageData;
-  }
-  return null;
-};`
-``
-
-
-
-
-
-```js
-// 获取图像的 imageData 对象
-const canvas = document.createElement('canvas'); // 创建一个 canvas 元素
-const ctx = canvas.getContext('2d'); // 获取 2D 上下文对象
-const img = new Image(); // 创建一个 Image 对象
-img.onload = function() { // 图像加载完成后执行的回调函数
-  canvas.width = img.width; // 设置 canvas 的宽度为图像的宽度
-  canvas.height = img.height; // 设置 canvas 的高度为图像的高度
-  ctx.drawImage(img, 0, 0); // 将图像绘制到 canvas 上
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); // 获取图像的 imageData 对象
-
-  // 水平翻转图像
-  for (let y = 0; y < imageData.height; y++) { // 遍历每一行像素数据
-    for (let x = 0; x < imageData.width / 2; x++) { // 遍历每一行像素数据的前半部分
-      const i = (y * imageData.width + x) * 4; // 计算当前像素数据的索引
-      const j = (y * imageData.width + imageData.width - x - 1) * 4; // 计算对称像素数据的索引
-      const temp = [...imageData.data.slice(i, i + 4)]; // 保存当前像素数据的值
-      imageData.data.copyWithin(i, j, j + 4); // 将对称像素数据的值复制到当前像素数据的位置
-      imageData.data.copyWithin(j, temp, 0, 4); // 将当前像素数据的值复制到对称像素数据的位置
-    }
-  }
-
-  // 将像素数据绘制到画布上
-  ctx.putImageData(imageData, 0, 0); // 将修改后的像素数据绘制到 canvas 上
-  document.body.appendChild(canvas); // 将 canvas 元素添加到文档中
-};
-img.src = 'image.jpg'; // 设置图像的 URL
-````
+效果如下： ![截屏2023-05-20 11.12.23.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f62b86585341487e95105d81d4f15a0c~tplv-k3u1fbpfcp-watermark.image?)
 
 \*\*\* TODO 整体功能就是 上传图片 -> 图片处理 -> 下载所以我会先进行代码的分析和理解，然后试着在这个基础上，进行改造。更适合使用。
 
@@ -370,4 +325,12 @@ img.src = 'image.jpg'; // 设置图像的 URL
 
 ## 参考
 
-[ImageData](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData) [toBlob](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toBlob) [手把手教你实现一个图像处理小工具](https://juejin.cn/post/6973321414786940941) [visualization-collection](https://github.com/hepengwei/visualization-collection)
+[ImageData](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData)
+
+[toBlob](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toBlob)
+
+[手把手教你实现一个图像处理小工具](https://juejin.cn/post/6973321414786940941)
+
+[visualization-collection](https://github.com/hepengwei/visualization-collection)
+
+[图像处理中常用的彩色模型](https://www.shuangyi-tech.com/news_63.html)

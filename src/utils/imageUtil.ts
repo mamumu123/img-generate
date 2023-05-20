@@ -229,7 +229,9 @@ export const toGrey = (imageData: ImageData) => {
         const startIndex = (y * width + x) * 4;
         // 设置为中间值
         const avgColor =
-          (data[startIndex] + data[startIndex + 1] + data[startIndex + 2]) / 3;
+          0.299 * data[startIndex] +
+          0.587 * data[startIndex + 1] +
+          data[startIndex + 2] * 0.114;
         newImgData[startIndex] = avgColor;
         newImgData[startIndex + 1] = avgColor;
         newImgData[startIndex + 2] = avgColor;
