@@ -5,56 +5,12 @@ import styles from './styles.less';
 import { useLocalStorageState } from 'ahooks';
 import { getImageSize } from '@/utils/image';
 import { loadImage } from '@/utils';
-import {
-  toRed,
-  toGreen,
-  toBlue,
-  flipUpsideDown,
-  flipSideToSide,
-  leftRotate,
-  rightRotate,
-  toGrey,
-  toBlackAndWhite,
-  sharpen,
-  marginSharpen,
-  toGaussianBlur,
-} from '@/utils/imageUtil';
+import { leftRotate, rightRotate } from '@/utils/imageUtil';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { downloadCanvasPart } from '@/utils/download';
+import { LENA_PATH, OP, methodList } from './constant';
 
-const LENA_PATH =
-  'https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/69b1afc1723c4233ba09e37c845973f1~tplv-k3u1fbpfcp-watermark.image';
-
-const OP = {
-  toRed: 'toRed',
-  toGreen: 'toGreen',
-  toBlue: 'toBlue',
-  flipUpsideDown: 'flipUpsideDown',
-  flipSideToSide: 'flipSideToSide',
-  leftRotate: 'leftRotate',
-  rightRotate: 'rightRotate',
-  toGrey: 'toGrey',
-  toBlackAndWhite: 'toBlackAndWhite',
-  sharpen: 'sharpen',
-  marginSharpen: 'marginSharpen',
-  toGaussianBlur: 'toGaussianBlur',
-  reset: 'reset',
-};
-
-const methodList = {
-  toRed,
-  toGreen,
-  toBlue,
-  flipUpsideDown,
-  flipSideToSide,
-  toGrey,
-  toBlackAndWhite,
-  sharpen,
-  marginSharpen,
-  toGaussianBlur,
-};
-
-function ColorGrid() {
+function CutImage() {
   // origin url
   const [url, setUrl] = useLocalStorageState<string>('url', {
     defaultValue: LENA_PATH,
@@ -376,12 +332,10 @@ function ColorGrid() {
                 </Button>
                 <Button
                   onClick={() =>
-                    downloadCanvasPart(canvasRef.current!, [
-                      cx,
-                      cy,
-                      cWidth,
-                      cHeight,
-                    ])
+                    downloadCanvasPart(
+                      canvasRef.current!,
+                      startCrop ? [cx, cy, cWidth, cHeight] : [],
+                    )
                   }
                 >
                   下载
@@ -443,4 +397,4 @@ function ColorGrid() {
   );
 }
 
-export default ColorGrid;
+export default CutImage;

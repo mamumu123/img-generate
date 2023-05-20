@@ -41,9 +41,9 @@ export default defineConfig({
       component: './RGBColorPicker',
     },
     {
-      name: 'Canvas 修改',
-      path: '/getImageData',
-      component: './RGBColorPicker/canvasDeal',
+      name: '图像处理',
+      path: '/cut',
+      component: './cut',
     },
 
     { component: '@/pages/' },
