@@ -25,13 +25,6 @@ import { downloadCanvasPart } from '@/utils/download';
 const LENA_PATH =
   'https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/69b1afc1723c4233ba09e37c845973f1~tplv-k3u1fbpfcp-watermark.image';
 
-// interface Rect {
-//   x: number;
-//   y: number;
-//   width: number;
-//   height: number;
-// }
-
 const OP = {
   toRed: 'toRed',
   toGreen: 'toGreen',
@@ -82,12 +75,14 @@ function ColorGrid() {
   const [cy, setY] = useState(0);
   const [cWidth, setWidth] = useState(0);
   const [cHeight, setHeight] = useState(0);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   // 是否开启遮罩
   const [startCrop, setCrop] = useLocalStorageState<boolean>('startCrop', {
     defaultValue: false,
   });
 
+  // 遮罩层绘制
   useEffect(() => {
     const canvas = maskCanvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -100,6 +95,23 @@ function ColorGrid() {
       console.log('originData', originData);
       ctx.fillRect(0, 0, originData?.width, originData?.height);
       ctx.clearRect(cx, cy, cWidth, cHeight);
+
+      // Draw circles at the midpoint of each edge
+      const circleRadius = 10;
+      const midPoints = [
+        { x: cx + cWidth / 2, y: cy }, // Top
+        { x: cx + cWidth, y: cy + cHeight / 2 }, // Right
+        { x: cx + cWidth / 2, y: cy + cHeight }, // Bottom
+        { x: cx, y: cy + cHeight / 2 }, // Left
+      ];
+
+      midPoints.forEach((point) => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, circleRadius, 0, 2 * Math.PI);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+      });
     }
   }, [startCrop, cx, cy, cWidth, cHeight, originData]);
 
@@ -205,6 +217,9 @@ function ColorGrid() {
 
   const [dragging, setDragging] = useState(false);
 
+  const [resizing, setResizing] = useState(false);
+  const [resizeIndex, setResizeIndex] = useState(-1);
+
   const getCanvasMousePosition = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -216,29 +231,94 @@ function ColorGrid() {
     return { x, y };
   };
 
+  const isMouseOnCircle = (
+    mouseX: number,
+    mouseY: number,
+    circleX: number,
+    circleY: number,
+    radius: number,
+  ) => {
+    const dx = mouseX - circleX;
+    const dy = mouseY - circleY;
+    return dx * dx + dy * dy <= radius * radius;
+  };
+
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const { x, y } = getCanvasMousePosition(e);
 
     // Check if the mouse is inside the rectangle
     if (x >= cx && x <= cx + cWidth && y >= cy && y <= cy + cHeight) {
       setDragging(true);
-      //   setOffset({ x: x - rect.x, y: y - rect.y });
+      setOffset({ x: x - cx, y: y - cy });
     }
+
+    // Check if the mouse is on the resize circle
+    // (Add logic for checking if the mouse is on any of the resize circles)
+    // Check if the mouse is on the resize circle
+    const circleRadius = 10;
+    const midPoints = [
+      { x: cx + cWidth / 2, y: cy }, // Top
+      { x: cx + cWidth, y: cy + cHeight / 2 }, // Right
+      { x: cx + cWidth / 2, y: cy + cHeight }, // Bottom
+      { x: cx, y: cy + cHeight / 2 }, // Left
+    ];
+
+    midPoints.forEach((point, index) => {
+      if (isMouseOnCircle(x, y, point.x, point.y, circleRadius)) {
+        setResizing(true);
+        setResizeIndex(index);
+        setOffset({ x: x - cx, y: y - cy });
+      }
+    });
   };
 
   const handleMouseUp = () => {
     setDragging(false);
+    setResizing(false);
+    setResizeIndex(-1);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!originData) {
+      return;
+    }
     if (dragging) {
-      console.log(e);
-      // const { x, y } = getCanvasMousePosition(e);
-      //   setRect({
-      //     ...rect,
-      //     x: x - offset.x,
-      //     y: y - offset.y,
-      //   });
+      const { x, y } = getCanvasMousePosition(e);
+
+      const newX = x - offset.x;
+      const newY = y - offset.y;
+
+      // Check if the new position is within the canvas boundaries
+      if (newX >= 0 && newX + cWidth <= originData?.width) {
+        setX(newX);
+      }
+      if (newY >= 0 && newY + cHeight <= originData?.height) {
+        setY(newY);
+      }
+
+      if (resizing) {
+        const dx = x - cx;
+        const dy = y - cy;
+
+        switch (resizeIndex) {
+          case 0: // Top
+            setY(y);
+            setHeight(cHeight - dy);
+            break;
+          case 1: // Right
+            setWidth(dx);
+            break;
+          case 2: // Bottom
+            setHeight(dy);
+            break;
+          case 3: // Left
+            setX(x);
+            setWidth(cWidth - dx);
+            break;
+          default:
+            break;
+        }
+      }
     }
   };
 
