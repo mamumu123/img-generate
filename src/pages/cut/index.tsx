@@ -49,7 +49,6 @@ function CutImage() {
     ctx.clearRect(0, 0, originData?.width, originData?.height);
     if (startCrop) {
       ctx.fillStyle = 'rgba(125, 125, 125, 0.5)';
-      console.log('originData', originData);
       ctx.fillRect(0, 0, originData?.width, originData?.height);
       ctx.clearRect(cx, cy, cWidth, cHeight);
 
