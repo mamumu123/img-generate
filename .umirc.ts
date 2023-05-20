@@ -16,13 +16,13 @@ export default defineConfig({
   },
   routes: [
     {
-      name: '图片裁剪',
-      path: '/cropper',
-      component: './cropper',
+      name: '图像处理',
+      path: '/',
+      component: './cut',
     },
     {
       name: '头像拼接',
-      path: '/',
+      path: '/avatar',
       component: './',
     },
     {
@@ -39,11 +39,6 @@ export default defineConfig({
       name: '三原色',
       path: '/red',
       component: './RGBColorPicker',
-    },
-    {
-      name: '图像处理',
-      path: '/cut',
-      component: './cut',
     },
 
     { component: '@/pages/' },
