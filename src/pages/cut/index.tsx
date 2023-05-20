@@ -8,7 +8,8 @@ import { loadImage } from '@/utils';
 import { leftRotate, rightRotate } from '@/utils/imageUtil';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { downloadCanvasPart } from '@/utils/download';
-import { LENA_PATH, OP, methodList } from './constant';
+import { LENA_PATH, OP, methodList, OP_OPTIONS } from './constant';
+import { FilterCheckboxes } from './components/option';
 
 function CutImage() {
   // origin url
@@ -286,42 +287,7 @@ function CutImage() {
             <Card>
               <Input value={url || LENA_PATH} onChange={handleChange} />
               <Checkbox.Group style={{ width: '100%' }} onChange={onChange}>
-                <Row>
-                  {/* 滤镜 */}
-                  <Col span={4}>
-                    <Checkbox value={OP.toRed}>红色滤镜</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.toGreen}>绿色滤镜</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.toBlue}>蓝色滤镜</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.toGrey}>灰化</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.toBlackAndWhite}>黑白化</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.sharpen}>锐化</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.marginSharpen}>边缘锐化</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.toGaussianBlur} disabled>
-                      高斯模糊
-                    </Checkbox>
-                  </Col>
-                  {/* 翻转 */}
-                  <Col span={4}>
-                    <Checkbox value={OP.flipSideToSide}>左右翻转</Checkbox>
-                  </Col>
-                  <Col span={4}>
-                    <Checkbox value={OP.flipUpsideDown}>上下翻转</Checkbox>
-                  </Col>
-                </Row>
+                <FilterCheckboxes options={OP_OPTIONS} />
               </Checkbox.Group>
               <div>
                 <Button onClick={() => perChange(OP.leftRotate)}>
