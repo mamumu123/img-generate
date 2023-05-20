@@ -16,8 +16,12 @@ export default defineConfig({
   },
   routes: [
     {
-      name: '图像处理',
       path: '/',
+      redirect: '/cut',
+    },
+    {
+      name: '图像处理',
+      path: '/cut',
       component: './cut',
     },
     {
