@@ -24,3 +24,28 @@ export const download = async (canvasRef: any) => {
     el.dispatchEvent(event);
   }
 };
+
+export function downloadCanvasPart(
+  canvas: HTMLCanvasElement,
+  [x = 0, y = 0, width = canvas.width, height = canvas.height]: [
+    number?,
+    number?,
+    number?,
+    number?,
+  ],
+) {
+  const ctx = canvas.getContext('2d')!;
+  const imageData = ctx.getImageData(x, y, width, height);
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = width;
+  tempCanvas.height = height;
+  const tempCtx = tempCanvas.getContext('2d')!;
+  tempCtx.putImageData(imageData, 0, 0);
+  console.log('tempCtx', imageData);
+  tempCanvas.toBlob((blob) => {
+    const link = document.createElement('a');
+    link.download = 'canvas.png';
+    link.href = URL.createObjectURL(blob!);
+    link.click();
+  }, 'image/png');
+}
