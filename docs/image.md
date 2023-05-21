@@ -1,24 +1,34 @@
-## 背景
-
-### 本文介绍
-
-本文通过 canvas 的 ImageData， 实现了一个基础的图像处理工具。可以在浏览器对图片进行左右镜像、左右旋转、颜色滤镜、尺寸修改等操作。
+## 项目介绍
 
 ### 关键词
 
-imageData、canvas、 图像处理、滤镜
+imageData、canvas、 图像处理、滤镜、裁剪
+
+### 背景介绍
+
+本文通过 canvas 的 ImageData， 实现了一个基础的图像处理工具。可以在浏览器对图片进行左右镜像、左右旋转、颜色滤镜、尺寸修改等操作。
 
 ### 功能介绍
 
-逛 github 热榜的时候看到一个项目 [visualization-collection](http://hepengwei.cn/#/gameImage), 里面有很多的前端视觉效果。其中有一个图片处理的项目（[体验地址](http://hepengwei.cn/#/gameImage)），实现了对图片的滤镜、翻转、旋转等功能，感觉是个很有用的功能，所以尝试进行学习和理解。
+逛 github 热榜的时候看到一个项目 [visualization-collection](http://hepengwei.cn/#/gameImage), 里面有很多的前端视觉效果。其中有一个图片处理的项目（[体验地址](http://hepengwei.cn/#/gameImage)），实现了对图片的滤镜、翻转、旋转等功能，感觉是个很有用的功能，所以尝试进行学习和理解。最终实现一个基础版的图像裁剪工具。
 
-![截屏2023-05-17 16.05.46.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/29a572042eee41008d85395be019d9b7~tplv-k3u1fbpfcp-watermark.image?)
+### 效果图
+
+![截屏2023-05-21 14.38.09.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/883caeccb3cb40b69a001ba88a8801ca~tplv-k3u1fbpfcp-watermark.image?)
+
+### 体验地址
+
+[在线体验](https://mamumu123.github.io/img-generate/cut)
+
+### 代码仓库
+
+[img-generate ](https://github.com/mamumu123/img-generate)
 
 ## 流程知识点(API)介绍
 
 ### 处理流程
 
-在浏览器中 ，图片本身是无法被修改的。如果想要处理图像（Image)，可以通过转化成 canvas 来实现。
+在浏览器中 ，图片本身是无法被修改的。如果想要处理图像（Image)，可以通过转化成 Canvas 来实现。
 
 ```mermaid
 graph LR
@@ -133,7 +143,7 @@ console.log(imageData);
 - 灰化
 - 锐化
 
-我们来挑取一些进行实现。
+我们来选取一些进行实现。
 
 ### 红色滤镜
 
@@ -182,6 +192,8 @@ newImgData[startIndex + 3] = data[startIndex + 3];
 ```js
 L = 0.299 * R + 0.587 * G + 0.114 * B;
 ```
+
+那么灰化对应的元素修改则是：
 
 ```js
 const startIndex = (y * width + x) * 4;
@@ -326,6 +338,225 @@ newImgData[startIndex + 3] = data[startIndex + 3];
 效果如下：
 
 ![截屏2023-05-20 11.12.23.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f62b86585341487e95105d81d4f15a0c~tplv-k3u1fbpfcp-watermark.image?)
+
+## 裁剪功能实现
+
+裁剪功能分成 2 部分，分别是：
+
+- 设置裁剪参数： x、y、width、height
+- 下载指定范围的图像
+
+### 设置裁剪参数
+
+设置参数通过有两种方式，一个是增加表单，通过表单来填写参数；另一种是更加可视化的拖拽方式。第一种比较简单，我们来看看如何实现拖拽方式修改参数。
+
+- 矩形蒙层
+- 拖拽功能
+- 放大缩小功能
+
+#### 矩形蒙层
+
+我们在预览 canvas 上方
+
+```js
+// 遮罩层绘制
+useEffect(() => {
+  const canvas = maskCanvasRef.current;
+  const ctx = canvas?.getContext('2d');
+  if (!ctx || !originData) {
+    return;
+  }
+  // 绘制之前先清除全部
+  ctx.clearRect(0, 0, originData?.width, originData?.height);
+
+  // 如果开启裁剪功能
+  if (startCrop) {
+    // 设置全部蒙层，将范围内的蒙层去掉，表示裁剪范围；
+    ctx.fillStyle = 'rgba(125, 125, 125, 0.5)';
+    ctx.fillRect(0, 0, originData?.width, originData?.height);
+    ctx.clearRect(cx, cy, cWidth, cHeight);
+  }
+}, [startCrop, cx, cy, cWidth, cHeight, originData]);
+```
+
+我们还可以在矩形每条边的中点， 绘制一下圆形，用来进行放大缩小：
+
+```js
+// Draw circles at the midpoint of each edge
+const circleRadius = 10;
+const midPoints = [
+  { x: cx + cWidth / 2, y: cy }, // Top
+  { x: cx + cWidth, y: cy + cHeight / 2 }, // Right
+  { x: cx + cWidth / 2, y: cy + cHeight }, // Bottom
+  { x: cx, y: cy + cHeight / 2 }, // Left
+];
+
+midPoints.forEach((point) => {
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, circleRadius, 0, 2 * Math.PI);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'red';
+  ctx.stroke();
+});
+```
+
+### 拖拽功能
+
+为了实现拖拽功能，我们首先需要对 canvas 进行事件监听 `onMouseDown`, 'onMouseUp', 'onMouseMove'
+
+```js
+<canvas
+  ref={maskCanvasRef}
+  className={styles.mask__canvas}
+  onMouseDown={handleMouseDown}
+  onMouseUp={handleMouseUp}
+  onMouseMove={handleMouseMove}
+/>
+```
+
+在 handleMouseDown 函数中，我们判断鼠标是否在矩形框内，如果是，则设置 `dragging = true` 说明可以拖拽。
+
+```js
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { x, y } = getCanvasMousePosition(canvasRef.current!, e);
+
+    // Check if the mouse is inside the rectangle
+    if (x >= cx && x <= cx + cWidth && y >= cy && y <= cy + cHeight) {
+      setDragging(true);
+      setOffset({ x: x - cx, y: y - cy });
+    }
+  };
+```
+
+在 handleMouseMove 函数中，如果 `dragging` 状态为 true，则根据鼠标的位置计算出新的矩形框的大小，并更新矩形框的状态。
+
+```js
+const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  if (!originData) {
+    return;
+  }
+  if (dragging) {
+    const { x, y } = getCanvasMousePosition(canvasRef.current!, e);
+
+    const newX = x - offset.x;
+    const newY = y - offset.y;
+
+    // Check if the new position is within the canvas boundaries
+    if (newX >= 0 && newX + cWidth <= originData?.width) {
+      setX(newX);
+    }
+    if (newY >= 0 && newY + cHeight <= originData?.height) {
+      setY(newY);
+    }
+  }
+}
+```
+
+最后，在 handleMouseUp 函数中，我们将`dragging`状态设置为 false，表示停止拖拽。
+
+```js
+const handleMouseUp = () => {
+  setDragging(false);
+};
+```
+
+### 缩放功能
+
+缩放功能和拖拽功能比较像，也是处理三个事件首先在 handleMouseDown 函数中检查鼠标是否在调整大小的圆圈上。如果是，我们将 resizing 状态设置为 true，并记录当前拖动的圆圈的索引。我们还将鼠标的偏移量存储在 offset 状态中，以便在调整大小时使用。
+
+```js
+const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const { x, y } = getCanvasMousePosition(canvasRef.current!, e);
+
+    // Check if the mouse is on the resize circle
+    const circleRadius = 10;
+    const midPoints = [
+      { x: cx + cWidth / 2, y: cy }, // Top
+      { x: cx + cWidth, y: cy + cHeight / 2 }, // Right
+      { x: cx + cWidth / 2, y: cy + cHeight }, // Bottom
+      { x: cx, y: cy + cHeight / 2 }, // Left
+    ];
+
+    midPoints.forEach((point, index) => {
+      if (isMouseOnCircle(x, y, point.x, point.y, circleRadius)) {
+        setResizing(true);
+        setResizeIndex(index);
+        setOffset({ x: x - cx, y: y - cy });
+      }
+    });
+}
+```
+
+接下来，在 handleMouseMove 函数中，我们根据 resizeIndex 的值来调整矩形的大小。我们使用 switch 语句来处理不同的调整大小情况：
+
+对于索引 0（顶部圆圈），我们将矩形的 cy 值设置为鼠标的 y 值，并相应地减小矩形的高度。对于索引 1（右侧圆圈），我们将矩形的宽度设置为鼠标 x 值与矩形左上角 x 坐标之间的距离。对于索引 2（底部圆圈），我们将矩形的高度设置为鼠标 y 值与矩形左上角 y 坐标之间的距离。对于索引 3（左侧圆圈），我们将矩形的 cx 值设置为鼠标的 x 值，并相应地减小矩形的宽度。
+
+这样，当用户拖动调整大小的圆圈时，矩形的大小将根据拖动的方向进行调整。
+
+```js
+const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  if (!originData) {
+    return;
+  }
+  switch (resizeIndex) {
+    case 0: // Top
+      setY(y);
+      setHeight(cHeight - dy);
+      break;
+    case 1: // Right
+      setWidth(dx);
+      break;
+    case 2: // Bottom
+      setHeight(dy);
+      break;
+    case 3: // Left
+      setX(x);
+      setWidth(cWidth - dx);
+      break;
+    default:
+      break;
+  }
+};
+```
+
+最后，在 handleMouseUp 函数中，我们将`dragging`状态设置为 false，表示停止拖拽。
+
+```js
+const handleMouseUp = () => {
+  setResizing(false);
+  setResizeIndex(-1);
+};
+```
+
+### 下载指定范围的图像
+
+我们首先获取到指定范围 ImageData，然后用这个数据生成一个新的 canvas
+
+```js
+// get ImageData，然后用这个数据生成一个新的
+const ctx = canvas.getContext('2d')!;
+const imageData = ctx.getImageData(x, y, width, height);
+
+// generate new canvas
+const tempCanvas = document.createElement('canvas');
+tempCanvas.width = width;
+tempCanvas.height = height;
+const tempCtx = tempCanvas.getContext('2d')!;
+tempCtx.putImageData(imageData, 0, 0);
+```
+
+然后如之前一样，我们用 toBlob 将 canvas 转成图片进行下载。
+
+```js
+tempCanvas.toBlob((blob) => {
+  const link = document.createElement('a');
+  link.download = 'canvas.png';
+  link.href = URL.createObjectURL(blob!);
+  link.click();
+}, 'image/png');
+```
+
+最终实现的效果如图： ![截屏2023-05-21 14.38.09.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/883caeccb3cb40b69a001ba88a8801ca~tplv-k3u1fbpfcp-watermark.image?)
 
 ## TODO
 

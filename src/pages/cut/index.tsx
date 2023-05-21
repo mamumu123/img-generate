@@ -186,7 +186,6 @@ function CutImage() {
 
     // Check if the mouse is on the resize circle
     // (Add logic for checking if the mouse is on any of the resize circles)
-    // Check if the mouse is on the resize circle
     const circleRadius = 10;
     const midPoints = [
       { x: cx + cWidth / 2, y: cy }, // Top
