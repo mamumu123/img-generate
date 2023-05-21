@@ -3,15 +3,17 @@ import { Col, Row, Input, Checkbox, Card, Button, Form, Switch } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './styles.less';
 import { useLocalStorageState } from 'ahooks';
-import { getImageSize } from '@/utils/image';
 import { loadImage } from '@/utils';
 import { leftRotate, rightRotate } from '@/utils/imageUtil';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { downloadCanvasPart } from '@/utils/download';
-import { LENA_PATH, OP, methodList, OP_OPTIONS } from './constant';
+import { OP, methodList, OP_OPTIONS, LENA_PATH } from './constant';
 import { FilterCheckboxes } from './components/option';
+import { getCanvasMousePosition, isMouseOnCircle } from './utils';
+import { getImageSize } from '@/utils/image';
 
 function CutImage() {
+  // const [originImage, setOriginImage] = useState<HTMLImageElement>(null);
   // origin url
   const [url, setUrl] = useLocalStorageState<string>('url', {
     defaultValue: LENA_PATH,
@@ -167,40 +169,13 @@ function CutImage() {
     setNewData(nData);
   };
 
-  const handleSwitchCrop = (c: boolean) => {
-    setCrop(c);
-  };
-
   const [dragging, setDragging] = useState(false);
 
   const [resizing, setResizing] = useState(false);
   const [resizeIndex, setResizeIndex] = useState(-1);
 
-  const getCanvasMousePosition = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return { x: 0, y: 0 };
-    }
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    return { x, y };
-  };
-
-  const isMouseOnCircle = (
-    mouseX: number,
-    mouseY: number,
-    circleX: number,
-    circleY: number,
-    radius: number,
-  ) => {
-    const dx = mouseX - circleX;
-    const dy = mouseY - circleY;
-    return dx * dx + dy * dy <= radius * radius;
-  };
-
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const { x, y } = getCanvasMousePosition(e);
+    const { x, y } = getCanvasMousePosition(canvasRef.current!, e);
 
     // Check if the mouse is inside the rectangle
     if (x >= cx && x <= cx + cWidth && y >= cy && y <= cy + cHeight) {
@@ -239,7 +214,7 @@ function CutImage() {
       return;
     }
     if (dragging) {
-      const { x, y } = getCanvasMousePosition(e);
+      const { x, y } = getCanvasMousePosition(canvasRef.current!, e);
 
       const newX = x - offset.x;
       const newY = y - offset.y;
@@ -311,7 +286,10 @@ function CutImage() {
           </Col>
           <Col span={8} className={styles.block__container}>
             <Form.Item label="开启裁剪">
-              <Switch checked={startCrop} onChange={handleSwitchCrop} />
+              <Switch
+                checked={startCrop}
+                onChange={(c: boolean) => setCrop(c)}
+              />
             </Form.Item>
             <Form.Item label="X">
               <Input
