@@ -1,4 +1,4 @@
-import { Checkbox, Col, Row } from 'antd';
+import { Checkbox, Row } from 'antd';
 import React from 'react';
 
 interface Option {
@@ -15,9 +15,9 @@ export const FilterCheckboxes: React.FC<IFilterCheckboxes> = ({
 }: IFilterCheckboxes) => (
   <Row>
     {options.map((item) => (
-      <Col span={4} key={item.key}>
-        <Checkbox value={item.key}>{item.label}</Checkbox>
-      </Col>
+      <Checkbox value={item.key} key={item.key}>
+        {item.label}
+      </Checkbox>
     ))}
   </Row>
 );

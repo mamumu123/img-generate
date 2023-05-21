@@ -11,9 +11,9 @@ import { OP, methodList, OP_OPTIONS, LENA_PATH } from './constant';
 import { FilterCheckboxes } from './components/option';
 import { getCanvasMousePosition, isMouseOnCircle } from './utils';
 import { getImageSize } from '@/utils/image';
+import { GetImage } from './components/GetImage';
 
 function CutImage() {
-  // const [originImage, setOriginImage] = useState<HTMLImageElement>(null);
   // origin url
   const [url, setUrl] = useLocalStorageState<string>('url', {
     defaultValue: LENA_PATH,
@@ -126,10 +126,6 @@ function CutImage() {
       ctx.putImageData(newData, 0, 0);
     }
   }, [newData]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(e.target.value || LENA_PATH);
-  };
 
   // 这里返回一个数组，每个数组中的值都是一个效果；是一个结果
   const onChange = (checkedValues: CheckboxValueType[]) => {
@@ -259,22 +255,34 @@ function CutImage() {
         <Row className={styles.row__container}>
           <Col span={24}>
             <Card>
-              <Input value={url || LENA_PATH} onChange={handleChange} />
-              <Checkbox.Group style={{ width: '100%' }} onChange={onChange}>
+              <GetImage setUrl={setUrl} url={url || ''} />
+              <Checkbox.Group
+                style={{ width: '100%' }}
+                onChange={onChange}
+                className={styles.checkbox__container}
+              >
                 <FilterCheckboxes options={OP_OPTIONS} />
               </Checkbox.Group>
               <div>
-                <Button onClick={() => perChange(OP.leftRotate)}>
+                <Button
+                  onClick={() => perChange(OP.leftRotate)}
+                  className={styles.btn__op}
+                >
                   向左旋转
                 </Button>
-                <Button onClick={() => perChange(OP.rightRotate)}>
+                <Button
+                  onClick={() => perChange(OP.rightRotate)}
+                  className={styles.btn__op}
+                >
                   向右旋转
                 </Button>
-                <Button onClick={() => perChange(OP.reset)}>清空效果</Button>
+                <Button onClick={() => perChange(OP.reset)} danger>
+                  清空效果
+                </Button>
               </div>
             </Card>
           </Col>
-          <Col span={16} className={styles.block__container}>
+          <Col span={20} className={styles.block__container}>
             <canvas ref={canvasRef} />
             <canvas
               ref={maskCanvasRef}
@@ -284,56 +292,57 @@ function CutImage() {
               onMouseMove={handleMouseMove}
             />
           </Col>
-          <Col span={8} className={styles.block__container}>
-            <Form.Item label="开启裁剪">
-              <Switch
-                checked={startCrop}
-                onChange={(c: boolean) => setCrop(c)}
-              />
-            </Form.Item>
-            <Form.Item label="X">
-              <Input
-                type="number"
-                value={cx}
-                disabled={!startCrop}
-                onChange={(e) => setX(Number(e.target.value))}
-              />
-            </Form.Item>
-            <Form.Item label="Y">
-              <Input
-                type="number"
-                value={cy}
-                disabled={!startCrop}
-                onChange={(e) => setY(Number(e.target.value))}
-              />
-            </Form.Item>
-            <Form.Item label="width">
-              <Input
-                type="number"
-                value={cWidth}
-                disabled={!startCrop}
-                onChange={(e) => setWidth(Number(e.target.value))}
-              />
-            </Form.Item>
-            <Form.Item label="height">
-              <Input
-                type="number"
-                value={cHeight}
-                disabled={!startCrop}
-                onChange={(e) => setHeight(Number(e.target.value))}
-              />
-            </Form.Item>
-
-            <Button
-              onClick={() =>
-                downloadCanvasPart(
-                  canvasRef.current!,
-                  startCrop ? [cx, cy, cWidth, cHeight] : [],
-                )
-              }
-            >
-              下载
-            </Button>
+          <Col span={4} className={styles.crop__container}>
+            <Card className={styles.card__box}>
+              <Form.Item label="开启裁剪">
+                <Switch
+                  checked={startCrop}
+                  onChange={(c: boolean) => setCrop(c)}
+                />
+              </Form.Item>
+              <Form.Item label="X">
+                <Input
+                  type="number"
+                  value={cx}
+                  disabled={!startCrop}
+                  onChange={(e) => setX(Number(e.target.value))}
+                />
+              </Form.Item>
+              <Form.Item label="Y">
+                <Input
+                  type="number"
+                  value={cy}
+                  disabled={!startCrop}
+                  onChange={(e) => setY(Number(e.target.value))}
+                />
+              </Form.Item>
+              <Form.Item label="宽">
+                <Input
+                  type="number"
+                  value={cWidth}
+                  disabled={!startCrop}
+                  onChange={(e) => setWidth(Number(e.target.value))}
+                />
+              </Form.Item>
+              <Form.Item label="高">
+                <Input
+                  type="number"
+                  value={cHeight}
+                  disabled={!startCrop}
+                  onChange={(e) => setHeight(Number(e.target.value))}
+                />
+              </Form.Item>
+              <Button
+                onClick={() =>
+                  downloadCanvasPart(
+                    canvasRef.current!,
+                    startCrop ? [cx, cy, cWidth, cHeight] : [],
+                  )
+                }
+              >
+                下载
+              </Button>
+            </Card>
           </Col>
         </Row>
       </div>
