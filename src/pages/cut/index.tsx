@@ -14,6 +14,8 @@ import { getImageSize } from '@/utils/image';
 import { GetImage } from './components/GetImage';
 
 function CutImage() {
+  const [opList, setOpList] = useState<CheckboxValueType[]>([]);
+
   // origin url
   const [url, setUrl] = useLocalStorageState<string>('url', {
     defaultValue: LENA_PATH,
@@ -129,6 +131,8 @@ function CutImage() {
 
   // 这里返回一个数组，每个数组中的值都是一个效果；是一个结果
   const onChange = (checkedValues: CheckboxValueType[]) => {
+    setOpList(checkedValues);
+
     console.log('checked = ', checkedValues);
     if (!url || !originData) {
       return;
@@ -161,6 +165,7 @@ function CutImage() {
     // 清空
     if (op === OP.reset) {
       nData = originData!;
+      setOpList([]);
     }
     setNewData(nData);
   };
@@ -259,6 +264,7 @@ function CutImage() {
               <Checkbox.Group
                 style={{ width: '100%' }}
                 onChange={onChange}
+                value={opList}
                 className={styles.checkbox__container}
               >
                 <FilterCheckboxes options={OP_OPTIONS} />
