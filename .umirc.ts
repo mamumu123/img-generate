@@ -14,6 +14,9 @@ export default defineConfig({
   layout: {
     title: '工具中心',
   },
+  define: {
+    IS_ENV_DEVELOPMENT: process.env.NODE_ENV === 'development',
+  },
   routes: [
     {
       path: '/',
@@ -23,6 +26,11 @@ export default defineConfig({
       name: '图像处理',
       path: '/cut',
       component: './cut',
+    },
+    {
+      name: '音视频工具',
+      path: '/videoCut',
+      component: './videoCut',
     },
     {
       name: '头像拼接',
