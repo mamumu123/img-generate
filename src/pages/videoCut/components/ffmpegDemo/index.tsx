@@ -17,6 +17,7 @@ import {
   OUT_DEFAULT,
 } from '@/constants/ffmpeg';
 
+// FIXME: Unhandled Rejection (Error): ffmpeg.wasm was loaded, you should not load it again, use ffmpeg.isLoaded() to check next time.
 const ffmpeg = createFFmpeg({
   log: true,
   corePath: `${window.location.origin}/img-generate/static/v0.11.0/ffmpeg-core.js`,

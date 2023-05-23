@@ -4315,6 +4315,11 @@ duplexify@^4.1.2:
     readable-stream "^3.1.1"
     stream-shift "^1.0.0"
 
+duration-time-conversion@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.npmmirror.com/duration-time-conversion/-/duration-time-conversion-1.0.6.tgz#f408c85c865039f92e82021f6d1205e1f7f20798"
+  integrity sha512-WwQT3UOdEb/1wI3Bxgw0M/QaJhDGy0tSdu2gjKItbatEx2imQ8iX/532386rDjidqIG4v8kw0nT38OthSBgYgQ==
+
 dva-core@^2.0.4:
   version "2.0.4"
   resolved "https://registry.npmmirror.com/dva-core/-/dva-core-2.0.4.tgz#086665d1d5f684e089c5bfac9ba388d91cc9050a"

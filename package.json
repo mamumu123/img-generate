@@ -5,7 +5,7 @@
     "build": "max build",
     "dev": "max dev",
     "format": "prettier --cache --write .",
-    "postinstall": "max setup",
+    "postinstall": "max setup && patch-package",
     "prepare": "husky install",
     "setup": "max setup",
     "start": "npm run dev"
@@ -17,6 +17,7 @@
     "@umijs/max": "^4.0.56",
     "ahooks": "^3.7.7",
     "antd": "^5.0.0",
+    "duration-time-conversion": "^1.0.6",
     "lodash": "^4.17.21",
     "patch-package": "^7.0.0",
     "react-cropper": "^2.3.3",
