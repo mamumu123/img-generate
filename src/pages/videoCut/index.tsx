@@ -1,5 +1,5 @@
 import styles from './index.less';
-// import { SideBar } from './MainComp/sideBar';
+import { SideBar } from './components/sideBar';
 
 const Index = () => {
   return (
@@ -11,7 +11,9 @@ const Index = () => {
         {/* </div> */}
         <div className={styles.main_right}>
           <div className={styles.main_top}>
-            <div className={styles.asset}>asset</div>
+            <div className={styles.asset}>
+              <SideBar />
+            </div>
             <div className={styles.pre}>preview</div>
           </div>
           <div className={styles.main_bottom}>track</div>

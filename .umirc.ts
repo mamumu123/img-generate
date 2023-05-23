@@ -58,5 +58,12 @@ export default defineConfig({
   analytics: {
     baidu: 'e4ec5f782f5d1d99801021aff8419db7',
   },
-  npmClient: 'pnpm',
+  npmClient: 'yarn',
+  metas: [
+    {
+      httpEquiv: 'origin-trial',
+      content:
+        'Ahnv7FGao2cq+C3jTDLwV+C9cYehRObod7bjy9naBzPnxQasGZDFPSLunyOa8a47x+15DqM3VSHh8z5SH75rPgoAAAB9eyJvcmlnaW4iOiJodHRwczovL21hbXVtdTEyMy5naXRodWIuaW86NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=',
+    },
+  ],
 });

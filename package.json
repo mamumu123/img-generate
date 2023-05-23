@@ -13,13 +13,17 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@ant-design/pro-components": "^2.0.1",
+    "@ffmpeg/ffmpeg": "^0.11.6",
     "@umijs/max": "^4.0.56",
     "ahooks": "^3.7.7",
     "antd": "^5.0.0",
+    "lodash": "^4.17.21",
+    "patch-package": "^7.0.0",
     "react-cropper": "^2.3.3",
     "ts-lodash": "^4.0.11"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.194",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "husky": "^8.0.1",
