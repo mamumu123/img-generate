@@ -40,11 +40,11 @@ const Output = ({ videoSrc, outputType, inputType }: IOutput) => {
   return (
     <div className={styles.video__box}>
       {outputType === mediaType.mp4 && (
-        <video src={videoSrc.blob} width={300} height={300}></video>
+        <video crossOrigin='anonymous' src={videoSrc.blob} width={300} height={300}></video>
       )}
       {outputType === mediaType.mp3 && <audio src={videoSrc.blob}></audio>}
       {outputType === mediaType.png && (
-        <img src={videoSrc.blob} width={300} height={300}></img>
+        <img crossOrigin='anonymous' src={videoSrc.blob} width={300} height={300}></img>
       )}
 
       <Button type="primary">
@@ -157,7 +157,7 @@ export default function IndexPage() {
 
   return (
     <div className={styles.container}>
-      <h1> ffmpeg 小工具</h1>
+      {/* <h1> ffmpeg 小工具</h1> */}
       <div className={styles.box}>
         <h2> 步骤1: 上传处理文件</h2>
         <div className={styles.upload__container}>

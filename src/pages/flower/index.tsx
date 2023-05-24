@@ -88,12 +88,11 @@ const HomePage: React.FC = () => {
               style={{
                 cursor: 'pointer',
                 borderRadius: 5,
-                border: `2px solid ${
-                  imgSelect === it.key ? 'yellowgreen' : '#000'
-                }  `,
+                border: `2px solid ${imgSelect === it.key ? 'yellowgreen' : '#000'
+                  }  `,
               }}
             >
-              <img src={it.img} alt="" />
+              <img crossOrigin='anonymous' src={it.img} alt="" />
             </div>
           </Col>
         ))}
@@ -132,7 +131,7 @@ const HomePage: React.FC = () => {
           beforeUpload={beforeUpload}
         >
           {imageUrl ? (
-            <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+            <img crossOrigin='anonymous' src={imageUrl} alt="avatar" style={{ width: '100%' }} />
           ) : (
             uploadButton
           )}

@@ -6,12 +6,7 @@ export const SideBar = () => {
   console.log('log');
   return (
     <>
-    <FfmpegComponent />
-      {/* {sideSetting.map((item, index) => (
-        <div key={index} className={styles.container}>
-          {item.label}
-        </div>
-      ))} */}
+      <FfmpegComponent />
     </>
   );
 };
