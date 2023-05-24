@@ -14,6 +14,7 @@ export const VideoPlayer = ({
     setCurrentTime
 }: IVideoPlayer) => {
 
+    // TODO: controls 的 时间显示有问题，保留到了整数，这个后面需要处理一下。
     useEffect(() => {
         if (!videoRef.current) {
             return

@@ -4,6 +4,7 @@ import { drawBackground, drawRuler, drawPointer, getLength, getGap, clamp, getBe
 import styles from './styles.less';
 import { Col, InputNumber, Row, Slider } from 'antd';
 import { useSize } from 'ahooks'
+import { getCanvasMousePosition } from '@/pages/cut/utils';
 
 export interface Props {
     currentTime?: number
@@ -20,7 +21,7 @@ export const Track: FC<Props> = ({
     duration = 10,
     backgroundColor = "#529393",
     pointerWidth = 2,
-    pointerColor = '#ddd',
+    pointerColor = 'white',
     click,
 }) => {
 
@@ -53,14 +54,15 @@ export const Track: FC<Props> = ({
         if (!waveCanvas || !$shwave.current) {
             return 0
         }
+
+        // 偏移的宽度
+        const { x: left } = getCanvasMousePosition(waveCanvas, event);
         const { clientWidth: width } = waveCanvas;// canvas 实际宽度
         const pixelRatio = window.devicePixelRatio; // 1
         const length = getLength(durationRef.current); // 总长度
         // TODO: 这里的 width 以后要改造，宽度 * 放大比例
         const gap = getGap(width, length); // 0.1 s 所占用的像素宽度
 
-        // 偏移的宽度
-        const left = event.pageX - $shwave.current.offsetLeft / pixelRatio;
 
         const begin = getBegin(currentTime, durationRef.current);
         // left 在 时间中的位置
@@ -69,7 +71,7 @@ export const Track: FC<Props> = ({
             begin,
             begin + durationRef.current
         );
-
+        // console.log('clientWidth', width, 'length', length, 'gap', gap, 'left', left, 'begin', begin, 'time', time);
         return time;
     };
 

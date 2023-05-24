@@ -17,9 +17,10 @@ const Index = () => {
   const onClick = (time: number) => {
 
     if (!playerRef.current) {
+      console.error('onClick no playerRef')
+      setCurrentTime(time);
       return
     }
-
     playerRef.current.pause()
     playerRef.current.currentTime = time;
   }

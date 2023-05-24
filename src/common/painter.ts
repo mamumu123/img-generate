@@ -90,7 +90,7 @@ interface IDrawPointer {
     pixelRatio: number
     duration: number
     currentTime: number
-    color: string,
+    color?: string,
     pointerWidth: number
 }
 
@@ -114,11 +114,12 @@ export const drawPointer = ({
     const gap = getGap(width, length)
 
     const begin = getBegin(currentTime, duration);
-
+    const x = Number(((currentTime - begin) * 10 * gap).toFixed(3));
+    const cWidth = pointerWidth * pixelRatio;
     ctx.fillRect(
-        Number(((currentTime - begin) * 10 * gap).toFixed(3)), // x
+        x, // x
         0,  // y
-        pointerWidth * pixelRatio, // width
+        cWidth, // width
         height, // height
     )
 
