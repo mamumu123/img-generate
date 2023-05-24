@@ -1,5 +1,5 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { WaveCanvas } from '../../components/WaveCanvas'
+import { WaveCanvas } from './WaveCanvas'
 import { drawBackground, drawRuler, drawPointer, getLength, getGap, clamp, getBegin } from "@/common/painter";
 import styles from './styles.less';
 import { Col, InputNumber, Row, Slider } from 'antd';
