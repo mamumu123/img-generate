@@ -28,7 +28,7 @@ export const VideoPlayer = ({
 
     return (
         <div>
-            <video controls width={400} height={300} src={url} ref={videoRef}></video>
+            <video controls width={400} height={300} crossOrigin={'anonymous'} src={url} ref={videoRef}></video>
         </div>
     )
 }

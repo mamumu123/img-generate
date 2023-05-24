@@ -21,6 +21,16 @@ export const WaveCanvas = ({
         draw?.()
     }, [waveCanvas, draw, currentTime, duration]);
 
+    useEffect(() => {
+        // TODO:
+        // window.addEventListener('resize', () => {
+        //     console.log('111')
+        //     if (!waveCanvas) { return }
+        //     draw?.()
+        // });
+    }, [])
+
+
     return (
         <>
             <canvas

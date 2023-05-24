@@ -7,8 +7,7 @@ import { VideoPlayer } from './components/VideoPlayer';
 
 const Index = () => {
 
-    const [currentTime, setCurrentTime] = useState(0);
-
+  const [currentTime, setCurrentTime] = useState(0);
   const [url, setSrc] = useState('');
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const [duration, setDuration] = useState(10);
@@ -31,14 +30,10 @@ const Index = () => {
     }
     setSrc('https://live-s3m.mediav.com/nativevideo/853af20ef450e4b0e467055fc6b955b9-bit_cloud768.mp4');
   }
-  
+
   return (
     <div className={styles.container}>
-      {/* <div className={styles.header}>header</div> */}
       <div className={styles.main}>
-        {/* <div className={styles.side_bar}> */}
-        {/* <SideBar /> */}
-        {/* </div> */}
         <div className={styles.main_right}>
           <div className={styles.main_top}>
             <div className={styles.asset}>

@@ -1,6 +1,9 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { WaveCanvas } from '../../components/WaveCanvas'
 import { drawBackground, drawRuler, drawPointer, getLength, getGap, clamp, getBegin } from "@/common/painter";
+import styles from './styles.less';
+import { Col, InputNumber, Row, Slider } from 'antd';
+import { useSize } from 'ahooks'
 
 export interface Props {
     currentTime?: number
@@ -12,9 +15,6 @@ export interface Props {
     url?: string
 }
 
-/**
- * A custom Thing component. Neat!
- */
 export const Track: FC<Props> = ({
     currentTime = 0,
     duration = 10,
@@ -36,6 +36,12 @@ export const Track: FC<Props> = ({
     // canvas container
     const $shwave = useRef<HTMLDivElement>(null)
 
+    const containerRef = useRef<HTMLDivElement>(null)
+    const containerSize = useSize(containerRef);
+
+    // ratio
+    const [ratio, setRatio] = useState(1);
+
     const $canvas = (waveCanvas: any) => {
         if (waveCanvas !== null) {
             setWaveCanvas(waveCanvas);
@@ -49,8 +55,9 @@ export const Track: FC<Props> = ({
         }
         const { clientWidth: width } = waveCanvas;// canvas 实际宽度
         const pixelRatio = window.devicePixelRatio; // 1
-        const length = getLength(durationRef.current); // 100
-        const gap = getGap(width, length); // 0.1 s 所占用的像素 宽度
+        const length = getLength(durationRef.current); // 总长度
+        // TODO: 这里的 width 以后要改造，宽度 * 放大比例
+        const gap = getGap(width, length); // 0.1 s 所占用的像素宽度
 
         // 偏移的宽度
         const left = event.pageX - $shwave.current.offsetLeft / pixelRatio;
@@ -87,20 +94,30 @@ export const Track: FC<Props> = ({
         }
     }, [waveCanvas])
 
+    // set container width
+    useEffect(() => {
+        if (!containerSize || !containerRef.current || !$shwave.current) {
+            return
+        }
+        const { width: containerWidth } = containerSize
+        containerRef.current.style.width = `${containerWidth}px`;
+    }, [containerSize])
+
     const draw = () => {
         const ctx = waveCanvas && waveCanvas?.getContext("2d");
-        if (!waveCanvas || !ctx) return;
+        if (!waveCanvas || !ctx || !containerSize || !$shwave.current) return;
 
-        // set canvas width, 否则会出现模糊情况
-        ctx.imageSmoothingEnabled = false;
-        //像素比
+        // // set canvas width, 否则会出现模糊情况
+        // ctx.imageSmoothingEnabled = false;
         // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/devicePixelRatio
         const pixelRatio = window.devicePixelRatio;
 
-        const { clientHeight, clientWidth } = waveCanvas;
+        const { width: containerWidth, height: containerHeight } = containerSize
 
-        waveCanvas.width = clientWidth * pixelRatio;
-        waveCanvas.height = clientHeight * pixelRatio;
+        waveCanvas.width = containerWidth * pixelRatio * ratio;
+        waveCanvas.height = containerHeight * pixelRatio;
+
+        $shwave.current.style.width = `${waveCanvas.width}px`;
 
         //绘制背景
         drawBackground(waveCanvas, ctx, backgroundColor);
@@ -122,24 +139,40 @@ export const Track: FC<Props> = ({
     }
 
     return (
-        <div
-            ref={$shwave}
-            className="shwave"
-            style={{
-                position: 'relative',
-                display: 'flex',
-                height: '100%',
-                minWidth: '100%',
-                overflow: 'auto',
-            }}
-        >
+        <div className={styles.container} ref={containerRef}>
+            <div className={styles.tool__container}>
+                <Row className={styles.slider}>
+                    <Col span={5}>
+                        <Slider
+                            min={1}
+                            max={20}
+                            onChange={(value: number) => setRatio(value)}
+                            value={ratio}
+                            step={0.1} />
+                    </Col>
+                    <Col span={8}>
+                        <InputNumber
+                            min={1}
+                            max={20}
+                            style={{ margin: '0 16px' }}
+                            step={0.1}
+                            value={ratio}
+                            onChange={(value: number | null) => setRatio(value || 1)}
+                        />
+                    </Col>
+                </Row>
 
-            < WaveCanvas
-                $canvas={$canvas}
-                waveCanvas={waveCanvas}
-                draw={draw}
-                currentTime={currentTime}
-                duration={duration}
-            />
-        </div>)
+
+            </div>
+            <div ref={$shwave} className={styles.shwave}>
+                <WaveCanvas
+                    $canvas={$canvas}
+                    waveCanvas={waveCanvas}
+                    draw={draw}
+                    currentTime={currentTime}
+                    duration={duration}
+                />
+            </div>
+        </div>
+    )
 };
