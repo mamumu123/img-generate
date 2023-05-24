@@ -1,5 +1,7 @@
 import { defineConfig } from '@umijs/max';
 
+const isDEV = process.env.NODE_ENV !== 'development';
+
 export default defineConfig({
   antd: {},
   access: {},
@@ -15,7 +17,7 @@ export default defineConfig({
     title: '工具中心',
   },
   define: {
-    IS_ENV_DEVELOPMENT: process.env.NODE_ENV === 'development',
+    IS_ENV_DEVELOPMENT: isDEV,
   },
   routes: [
     {
@@ -31,6 +33,7 @@ export default defineConfig({
       name: '音视频工具',
       path: '/videoCut',
       component: './videoCut',
+      hide: !isDEV,
     },
     {
       name: '头像拼接',
@@ -52,7 +55,12 @@ export default defineConfig({
       path: '/red',
       component: './RGBColorPicker',
     },
-
+    {
+      name: '上传',
+      path: '/upload',
+      component: './videoCut/components/FileUpload',
+      hide: !isDEV,
+    },
     { component: '@/pages/' },
   ],
   analytics: {
