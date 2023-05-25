@@ -3,7 +3,9 @@ import React, { useEffect } from 'react';
 interface IVideoPlayer {
     url: string
     playerRef: React.MutableRefObject<HTMLVideoElement | null>
+    // eslint-disable-next-line @typescript-eslint/ban-types
     setCurrentTime: Function
+    // eslint-disable-next-line @typescript-eslint/ban-types
     setDuration: Function
 }
 

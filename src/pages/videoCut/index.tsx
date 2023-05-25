@@ -1,16 +1,26 @@
 import styles from './index.less';
-import { SideBar } from './components/sideBar';
 import { Button } from 'antd';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Track } from './components/Track'
 import { VideoPlayer } from './components/VideoPlayer';
+import FfmpegComponent from '@/pages/videoCut/components/ffmpegDemo'
+import { useModel } from '@umijs/max';
 
 const Index = () => {
+  // TDOO: 音视频展示
+  const { mediaFile, mediaType } = useModel('video')
 
   const [currentTime, setCurrentTime] = useState(0);
   const [url, setSrc] = useState('');
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const [duration, setDuration] = useState(10);
+
+  console.log('xxxx duration', duration)
+  useEffect(() => {
+    if (!mediaFile) { return }
+    const url = URL.createObjectURL(mediaFile)
+    setSrc(url);
+  }, [mediaFile])
 
 
   // 先不放 video
@@ -38,7 +48,7 @@ const Index = () => {
         <div className={styles.main_right}>
           <div className={styles.main_top}>
             <div className={styles.asset}>
-              <SideBar />
+              <FfmpegComponent />
             </div>
             <div className={styles.pre}>
               <VideoPlayer playerRef={playerRef} setCurrentTime={setCurrentTime} url={url} setDuration={setDuration} />

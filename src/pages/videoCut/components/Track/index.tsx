@@ -5,6 +5,7 @@ import styles from './styles.less';
 import { Col, InputNumber, Row, Slider } from 'antd';
 import { useSize } from 'ahooks'
 import { getCanvasMousePosition } from '@/pages/cut/utils';
+import { useForceUpdate } from '@/hooks/useForce'
 
 export interface Props {
     currentTime?: number
@@ -25,10 +26,12 @@ export const Track: FC<Props> = ({
     click,
 }) => {
 
-    const durationRef = useRef(duration);
+    const forceUpdate = useForceUpdate();
 
+    const durationRef = useRef(duration);
     useEffect(() => {
         durationRef.current = duration;
+        forceUpdate()
     }, [duration])
 
     // track canvas
