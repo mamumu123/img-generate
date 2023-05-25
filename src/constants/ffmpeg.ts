@@ -1,4 +1,4 @@
-export const DEFAULT_ARGS = '-c:v copy';
+export const DEFAULT_ARGS = '';
 
 export interface ISrc {
   f: string;
@@ -37,7 +37,7 @@ export const getOp = (op: string, args?: IGetOp) => {
       break;
     case OP_NAME.getInfo:
       resultOp = '';
-      output = 'out.mp3';
+      output = '';
 
       break;
     default:
@@ -49,12 +49,12 @@ export const getOp = (op: string, args?: IGetOp) => {
 
 export const optionSetting = [
   {
-    value: '',
-    label: '自定义输入',
-  },
-  {
     value: OP_NAME.getInfo,
     label: '获取视频信息',
+  },
+  {
+    value: '',
+    label: '自定义输入',
   },
   // {
   //   value: OP_NAME.screenshot,

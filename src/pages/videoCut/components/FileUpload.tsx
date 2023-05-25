@@ -12,7 +12,7 @@ function FileUpload() {
         const file = event.target.files?.[0];
         if (file) {
             try {
-                db.files.put({ name: file.name, type: file.type, data: file })
+                db.files.put({ name: file.name.replace(/\s/g, ''), type: file.type, data: file })
             } catch (error) {
                 console.error('handleMediaChange error', error)
             }

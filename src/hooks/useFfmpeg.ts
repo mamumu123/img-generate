@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 
 export const useFfmpeg = (ffmpeg: FFmpeg) => {
   const [stderr, setStderr] = useState<any[]>([]);
   const [progress, setProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -28,7 +29,10 @@ export const useFfmpeg = (ffmpeg: FFmpeg) => {
             return;
         }
       });
-      await ffmpeg.load();
+      if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+      }
+      setIsLoaded(true);
     })();
   }, []);
 
@@ -36,5 +40,6 @@ export const useFfmpeg = (ffmpeg: FFmpeg) => {
     stderr,
     setStderr,
     progress,
+    ffmpegIsLoaded: isLoaded,
   };
 };
