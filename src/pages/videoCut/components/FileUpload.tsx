@@ -1,16 +1,12 @@
-import React, { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import React from 'react';
 import { dbFileDexie as db } from '@/db'
 import { Button } from 'antd';
+import { useModel } from '@umijs/max';
+import { sizeTostr } from '@/utils/imageUtil';
 
 function FileUpload() {
 
-    const mediaList = useLiveQuery(
-        () => db.files?.toArray?.()
-    );
-
-    // TODO: 目前仅仅支持上传一个文件
-    const media = useMemo(() => mediaList?.length ? mediaList[0] : null, [mediaList])
+    const { media } = useModel('video')
 
     const handleMediaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -35,6 +31,7 @@ function FileUpload() {
                 <div>
                     <p>文件名：{media.name}</p>
                     <p>文件类型：{media.type}</p>
+                    <p>文件大小：{sizeTostr(media.data.size)}</p>
                     <Button onClick={handleMediaDel}>清除文件</Button>
                 </div>
             ) : (
