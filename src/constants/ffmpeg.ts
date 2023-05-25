@@ -1,4 +1,3 @@
-export const DEFAULT_ARGS = '';
 
 export interface ISrc {
   f: string;
@@ -13,6 +12,8 @@ interface IGetOp {
 
 export const OUT_DEFAULT = 'output.mp4';
 export const IN_DEFAULT = 'input.mp4';
+export const DEFAULT_ARGS = OUT_DEFAULT;
+
 
 export const OP_NAME = {
   getInfo: 'getInfo',
@@ -37,7 +38,7 @@ export const getOp = (op: string, args?: IGetOp) => {
       break;
     case OP_NAME.getInfo:
       resultOp = '';
-      output = '';
+      output = OUT_DEFAULT;
 
       break;
     default:

@@ -18,9 +18,9 @@ export const Output = ({ videoSrc, outputType, inputType }: IOutput) => {
   return (
     <div className={styles.video__box}>
       {outputType === mediaType.mp4 && (
-        <video crossOrigin='anonymous' src={videoSrc.blob} width={300} height={300}></video>
+        <video controls crossOrigin='anonymous' src={videoSrc.blob} width={300} height={300}></video>
       )}
-      {outputType === mediaType.mp3 && <audio crossOrigin='anonymous' src={videoSrc.blob}></audio>}
+      {outputType === mediaType.mp3 && <audio controls crossOrigin='anonymous' src={videoSrc.blob}></audio>}
       {outputType === mediaType.png && (
         <img crossOrigin='anonymous' src={videoSrc.blob} width={300} height={300}></img>
       )}

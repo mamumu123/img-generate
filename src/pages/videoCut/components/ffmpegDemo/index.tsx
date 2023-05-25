@@ -15,6 +15,7 @@ import {
 import FileUpload from '../FileUpload';
 import { useModel } from '@umijs/max';
 import { Output } from './OutputComponent';
+import { useLocalStorageState } from 'ahooks';
 
 const ffmpeg = createFFmpeg({
   log: true,
@@ -27,13 +28,17 @@ export default function FFmpegComponent() {
   const { media } = useModel('video')
 
   // input name
-  const [opInput, setOpInput] = useState('');
+  const opInput = media?.name;
 
   // op param
-  const [args, setArgs] = useState(DEFAULT_ARGS);
+  const [args, setArgs] = useLocalStorageState('args', {
+    defaultValue: DEFAULT_ARGS
+  });
 
   // 选择预制参数
-  const [inputType, setInputType] = useState(optionSetting[0].value);
+  const [inputType, setInputType] = useLocalStorageState('inputType', {
+    defaultValue: optionSetting[0].value
+  });
 
   // output name
   const [opOutput, setOpOutput] = useState('');
@@ -44,7 +49,7 @@ export default function FFmpegComponent() {
     // @ts-ignore
     const type = mediaType[str];
     return type;
-  }, []);
+  }, [opOutput]);
 
   // complete params
   const allArgs = useMemo(
@@ -52,19 +57,28 @@ export default function FFmpegComponent() {
     [opInput, args, opOutput],
   );
 
+  useEffect(() => {
+    if (inputType) {
+      const [op, output] = getOp(inputType);
+      setArgs(op);
+      setOpOutput(output);
+    } else {
+      setArgs(DEFAULT_ARGS);
+      setOpOutput(OUT_DEFAULT);
+    }
+  }, [inputType])
+
   // 结果列表
   const [videoSrc, setVideoSrc] = useState<ISrc | null>(); // output files
 
   // Link
   useEffect(() => {
-    // console.log('media', media, 'ffmpegIsLoaded', ffmpegIsLoaded)
     if (!media || !ffmpegIsLoaded) {
       return
     }
     (async () => {
       const { data, name } = media
       ffmpeg.FS('writeFile', name, await fetchFile(data));
-      setOpInput(name);
     })()
   }, [media, ffmpegIsLoaded]);
 
@@ -80,18 +94,24 @@ export default function FFmpegComponent() {
     if (!opOutput) {
       return;
     }
-    const data = ffmpeg.FS('readFile', opOutput);
-    setVideoSrc(() => {
-      const blob = URL.createObjectURL(
-        new Blob([data.buffer], { type: outputType }),
-      );
-      ffmpeg.FS('unlink', opOutput);
-      const temp = {
-        f: opOutput,
-        blob,
-      };
-      return temp;
-    });
+    try {
+      const data = ffmpeg.FS('readFile', opOutput);
+      setVideoSrc(() => {
+        const blob = URL.createObjectURL(
+          new Blob([data.buffer], { type: outputType }),
+        );
+        ffmpeg.FS('unlink', opOutput);
+        const temp = {
+          f: opOutput,
+          blob,
+        };
+        return temp;
+      });
+    } catch (error) {
+      console.error('error', error);
+      return
+    }
+
   };
 
   const onHandleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -117,17 +137,7 @@ export default function FFmpegComponent() {
           <Select
             value={inputType}
             style={{ width: 220, marginBottom: 10 }}
-            onChange={(value) => {
-              setInputType(value);
-              if (value) {
-                const [op, output] = getOp(value);
-                setArgs(op);
-                setOpOutput(output);
-              } else {
-                setArgs(DEFAULT_ARGS);
-                setOpOutput(OUT_DEFAULT);
-              }
-            }}
+            onChange={(value) => setInputType(value)}
             options={optionSetting}
           />
 
@@ -161,8 +171,10 @@ export default function FFmpegComponent() {
             {' '}
             运行{' '}
           </Button>
-          <Button onClick={onReset}> 重置 </Button>
+
           {progress !== 0 && <Progress percent={progress} />}
+
+          <Button onClick={onReset}> 重置 </Button>
         </div>
       </div>
       <div className={styles.box}>
@@ -171,7 +183,7 @@ export default function FFmpegComponent() {
           <Output
             videoSrc={videoSrc}
             outputType={outputType}
-            inputType={inputType}
+            inputType={inputType || ''}
           />
         </div>
       </div>

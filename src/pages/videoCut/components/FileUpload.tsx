@@ -1,6 +1,6 @@
 import React from 'react';
 import { dbFileDexie as db } from '@/db'
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { useModel } from '@umijs/max';
 import { sizeTostr } from '@/utils/imageUtil';
 
@@ -12,7 +12,13 @@ function FileUpload() {
         const file = event.target.files?.[0];
         if (file) {
             try {
-                db.files.put({ name: file.name.replace(/\s/g, ''), type: file.type, data: file })
+
+                const { name } = file;
+                if (/\s/.test(name)) {
+                    message.error('文件名不能存在空格');
+                    return;
+                }
+                db.files.put({ name, type: file.type, data: file })
             } catch (error) {
                 console.error('handleMediaChange error', error)
             }
