@@ -32,7 +32,7 @@ jobs:
           node-version: 18
           # 缓存 pnpm 依赖
           cache: 'npm'
-          run: npm ci
+        run: npm ci
 
       # 运行构建脚本
       - name: Build VuePress site
