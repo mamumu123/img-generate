@@ -3,11 +3,11 @@
     "source": "/(.*)",
     "headers": [
       {
-        "key": "cross-origin-opener-policy",
+        "key": "Cross-Origin-Opener-Policy",
         "value": "same-origin"
       },
       {
-        "key": "cross-origin-embedder-policy",
+        "key": "Cross-Origin-Embedder-Policy",
         "value": "require-corp"
       }
     ]
