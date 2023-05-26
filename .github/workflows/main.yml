@@ -37,7 +37,7 @@ jobs:
       - name: Build VuePress site
         env:
           NODE_OPTIONS: --max_old_space_size=8192
-        run: npm ci && npm run build
+        run: npm i && npm run build
 
       # 查看 workflow 的文档来获取更多信息
       # @see https://github.com/crazy-max/ghaction-github-pages
