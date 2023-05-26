@@ -8,8 +8,8 @@ export default defineConfig({
   //   type: 'hash'
   // },
   initialState: {},
-  base: '/img-generate/',
-  publicPath: '/img-generate/',
+  base: process.env.PUBLIC_PATH || '/',
+  publicPath: process.env.PUBLIC_PATH || '/',
   request: {},
   layout: {
     title: '工具中心',
