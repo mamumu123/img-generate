@@ -1,0 +1,12 @@
+diff --git a/node_modules/@ffmpeg/ffmpeg/src/browser/index.js b/node_modules/@ffmpeg/ffmpeg/src/browser/index.js
+index 19b7ff3..f960293 100644
+--- a/node_modules/@ffmpeg/ffmpeg/src/browser/index.js
++++ b/node_modules/@ffmpeg/ffmpeg/src/browser/index.js
+@@ -1,5 +1,6 @@
+-import defaultOptions from './defaultOptions';
++// import defaultOptions from './defaultOptions';
+ import { getCreateFFmpegCore } from './getCreateFFmpegCore';
+ import { fetchFile } from './fetchFile';
+ 
++const defaultOptions = {}
+ export { defaultOptions, getCreateFFmpegCore, fetchFile };

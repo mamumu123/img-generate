@@ -12,3 +12,5 @@
 /.mfsu
 .swc
 temp/
+
+.env.local
