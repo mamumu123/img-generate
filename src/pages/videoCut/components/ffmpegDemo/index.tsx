@@ -19,7 +19,7 @@ import { useLocalStorageState } from 'ahooks';
 
 const ffmpeg = createFFmpeg({
   log: true,
-  corePath: `${window.location.origin}/img-generate/static/v0.11.0/ffmpeg-core.js`,
+  corePath: `${window.location.origin}${process.env.PUBLIC_PATH}static/v0.11.0/ffmpeg-core.js`,
 });
 
 export default function FFmpegComponent() {

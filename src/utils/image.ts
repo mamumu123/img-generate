@@ -6,9 +6,11 @@ export function getImageSize(
     img.onload = () => {
       resolve({ width: img.width, height: img.height });
     };
-    img.onerror = () => {
+    img.onerror = (error) => {
+      console.error('error', error)
       reject(new Error('Failed to load image'));
     };
+    img.crossOrigin = 'anonymous';
     img.src = url;
   });
 }
