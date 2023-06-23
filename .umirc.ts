@@ -15,7 +15,29 @@ const routes = [
   {
     name: '音视频工具',
     path: '/videoCut',
-    component: './videoCut',
+    component: '@/layouts/index',
+    routes: [
+      {
+        name: '工具',
+        component: './videoCut',
+        path: '/videoCut/videoCut',
+      },
+      {
+        name: '上传',
+        path: '/videoCut/upload',
+        component: './videoCut/components/FileUpload',
+      },
+      {
+        name: 'ffmpeg',
+        path: '/videoCut/ffmpeg',
+        component: './videoCut/views/ffmpeg',
+      },
+      {
+        name: '轨道',
+        path: '/videoCut/track',
+        component: './videoCut/views/track',
+      },
+    ],
     hide: !isDEV,
   },
   {
@@ -37,24 +59,6 @@ const routes = [
     name: '三原色',
     path: '/red',
     component: './RGBColorPicker',
-  },
-  {
-    name: '上传',
-    path: '/upload',
-    component: './videoCut/components/FileUpload',
-    hide: !isDEV,
-  },
-  {
-    name: 'ffmpeg',
-    path: '/ffmpeg',
-    component: './videoCut/views/ffmpeg',
-    hide: !isDEV,
-  },
-  {
-    name: '轨道',
-    path: '/track',
-    component: './videoCut/views/track',
-    hide: !isDEV,
   },
   { component: '@/pages/' },
 ].filter((item) => item.hide !== true)

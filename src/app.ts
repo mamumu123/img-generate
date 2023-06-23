@@ -8,7 +8,8 @@ export async function getInitialState(): Promise<{ name: string }> {
 
 export const layout = () => {
   return {
-    collapsed: IS_ENV_DEVELOPMENT,
+    breakpoint: false,
+    defaultCollapsed: true,
     menu: {
       locale: false,
     },

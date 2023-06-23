@@ -233,15 +233,13 @@ TODO
 
 
 ## 实现视频轨道
-参考项目 [shWave](https://github.com/Shirtiny/shWave)，实现一个超级简单的轨道 demo, 为后面实现 mini 剪辑器做基础。改造点：
+为了可视化的实现音视频分割，需要实现一个轨道和播放器，来精细化的设置分割点位，并且通过播放器实时看到点位的视频效果。（参考了项目 [shWave](https://github.com/Shirtiny/shWave)，实现一个超级简单的轨道。）
 
-## 开始代码
 ### 整体分析
 将轨道拆分的话，分为
 - 背景
 - 刻度尺
 - 时间指针（指向当前视频播放的时刻）
-
 
 ### 静态实现
 
@@ -276,20 +274,17 @@ const draw = () => {
     const ctx = waveCanvas && waveCanvas?.getContext("2d");
     if (!waveCanvas || !ctx) return;
 
-    //像素比
-    const pixelRatio = window.devicePixelRatio;
-
     //绘制背景
     drawBackground(waveCanvas, ctx, backgroundColor);
 
     // 刻度尺
-    drawRuler(waveCanvas, ctx, pixelRatio, duration)
+    drawRuler(waveCanvas, ctx, 1, duration)
 
     // 时间指针
     drawPointer({
         canvas: waveCanvas,
         ctx,
-        pixelRatio,
+        pixelRatio: 1,
         duration,
         currentTime,
         color: pointerColor,
@@ -317,7 +312,7 @@ export const drawBackground = (canvas: HTMLCanvasElement, ctx: CanvasRenderingCo
 
 ##### 绘制刻度尺
 刻度尺就是循环遍历，然后绘制长短不一的小矩形
-- 整秒 最长
+- 整秒，最长
 - 0.5 秒，次之
 - 0.1 秒，最短
 然后在整秒刻度下面，会有文字显示
@@ -446,9 +441,10 @@ ctx.fillRect(
 ### 事件响应
 
 #### 缩放条
-shwave 的方式通过调整 duration，这个其实不太科学，比如有一个问题，就是放大的时候，无法看到后面的 duration ，只能放大前面的 duration
-应该是加入一个缩放比变量更合适。
-缩放比 + 滚动条。
+shwave 是通过调整 duration来进行缩放的。这个方案有一个问题，就是放大的时候，无法看到后面的 duration ，只能放大前面的 duration。
+我认为更加合适的方式应该是增加一个缩放比的字段，来控制轨道的长度。在下方增加一个滚动条，当放到轨道以后，可以通过滚动来查看后面的时间。
+
+![](./assets/10.png)
 
 #### 轨道点击
 当进行轨道点击以后，需要进行计算点到的对应时刻，然后重新设置 currentTime
@@ -511,16 +507,24 @@ const computeTimeFromEvent = (event: MouseEvent) => {
 }
 ```
 
-
 ### 播放器
+在实现完轨道以后，还要实现一个视频播放器，来实时看到点位的视频效果。
 
-播放器这里就是一个 video 元素，然后监听一些 video 的事件，在播放时进行 currentTime 的设置；
+播放器这里就是一个 video 元素，为了实现轨道和播放器的联动，需要监听一些 video 的事件，在播放时进行 currentTime 的设置；
 
-轨道  -> 点击轨道 -> 设置播放器的 currentTime -> 设置轨道的  currentTime
+```mermaid
+    graph LR
+    B[轨道] --点击轨道-->C[设置播放器的 currentTime]
+    C -->D[设置轨道的  currentTime]
+```
 
-点击播放视频 -> 播放器 currentTime 变化 -> 轨道时间刻度线跟随变化
+```mermaid
+    graph LR
+    A[播放器]--播放视频-->B[播放器 currentTime 变化]
+    B --> C[轨道时间刻度线跟随变化]
+```
 
-#### 
+#### 设置 video
 首先在界面中放置一个 video 元素
 ```js
 const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -544,11 +548,11 @@ useEffect(() => {
 }, [url])
 ```
 
+#### 基本效果展示
+![](./assets/9.png)
 
 
-## 基本效果展示
-![](./assets/8.png)
-
+## 项目
 
 
 
