@@ -44,6 +44,12 @@ const routes = [
     component: './videoCut/components/FileUpload',
     hide: !isDEV,
   },
+  {
+    name: 'ffmpeg',
+    path: '/ffmpeg',
+    component: './videoCut/views/ffmpeg',
+    hide: !isDEV,
+  },
   { component: '@/pages/' },
 ].filter((item) => item.hide !== true)
 
