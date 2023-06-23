@@ -50,6 +50,12 @@ const routes = [
     component: './videoCut/views/ffmpeg',
     hide: !isDEV,
   },
+  {
+    name: '轨道',
+    path: '/track',
+    component: './videoCut/views/track',
+    hide: !isDEV,
+  },
   { component: '@/pages/' },
 ].filter((item) => item.hide !== true)
 
