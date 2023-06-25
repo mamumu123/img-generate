@@ -1,28 +1,31 @@
 # 从零开始用 ffmpeg 写一个音视频处理工具
 
 ## 概述 
-本文作为一个文档，如何写一个在线音视频编辑工具。
-- 如何在 浏览器运行 ffmpeg 处理文件。
-- 实现一个视频轨道
-- 结合轨道和 ffmpeg,实现视频可视化，增加轨道
+本文将介绍如何写一个在线音视频编辑工具：
+- 如何在 浏览器运行 ffmpeg 处理音视频；
+- 如何用 canvas 实现一个视频轨道;
+- 结合视频轨道和 ffmpeg, 实现视频编辑可视化；
 
 ## 关键词
-ffmpeg、track、音视频
+ffmpeg、track、音视频、轨道、可视化
 
 ## 项目背景
 
 ### 项目制作原因
-在工作和生活中，经常会遇到一些和音视频相关的问题，比如：
-- 想要从一个视频中截图一张图片
-- 想要从一个长音频中截取某个特定的片段
-- 格式转化，从视频中提取音频
+在工作和生活中，经常会遇到一些音视频相关的问题，比如：
+- 想要从一个视频中截图一张图片；
+- 想要从一个长视频中截取某个特定的片段；
+- 格式转化，从视频中提取音频；
+- 获取视频信息，如帧率；
 - ...
 
-### 工具库介绍 -> ffmpeg
-ffmpeg 是一个很不错的音视频处理工具。并且靠着 wasm 技术，能够在浏览器端直接运行，不需要本地安装下载。
+如果在本地分析，需要先配置环境，安装 ffmpeg 等分析工具，而如果使用 wasm 技术，能够在浏览器端直接运行 ffmpeg，不需要本地安装下载。
+
+## 动手试试-在浏览器使用 ffmpeg
 
 ### @ffmpeg/ffmpeg
-npm 地址: https://www.npmjs.com/package/@ffmpeg/ffmpeg
+[npm 地址](https://www.npmjs.com/package/@ffmpeg/ffmpeg)
+
 这是一个编译好的包。缺点是比较大，第一次加载的时候需要等待几秒钟；优点就是可以直接拿来用。
 这里我们直接引用这个包，等之后需要优化的时候，再去考虑自行编译或者寻找更合适的包。
 
@@ -60,8 +63,6 @@ const ffmpeg = createFFmpeg({ log: true });
     E[处理生成文件]
 ```
 
-## 动手试试-在浏览器使用 ffmpeg
-
 ### 初始化项目
 我这里使用的是 umi，通过以下命令就可以进行初始化
 ```bash
@@ -73,11 +74,11 @@ yarn create @umijs/umi-app
 yarn start
 ```
 
-在执行完上面的步骤以后，浏览器端就可以看到效果了。
+在执行完上面的步骤以后，浏览器端就可以看到页面效果了。
 
 
 ### 引入 @ffmpeg/ffmpeg 
-安装包很简单，通过 `npm i @ffmpeg/ffmpeg`  就可以了，但是在引入的过程中，遇到了一些问题。
+安装包很简单，通过 `npm i @ffmpeg/ffmpeg`  就可以了，但是在引入的过程中，本人遇到了一些问题。
 
 #### 问题一： Module parse failed: Unexpected token
 webpack4 
@@ -151,9 +152,8 @@ Cross-Origin-Opener-Policy: same-origin
 ```
 
 ### 梳理步骤，跑通基本流程
-在顺序引入 @ffmpeg/ffmpeg 包以后，就可以开发功能了。
-按照功能优先的原则，觉得先把功能跑通，后面再优化流程和 UI。
-参考了网上几个 `ffmpeg` 的 demo, 然后整理了一个比较舒服的流程。
+在顺利引入 `@ffmpeg/ffmpeg` 包以后，就可以开始开发功能了。按照功能优先的原则，先把功能跑通，后面再优化流程和 UI。
+参考了几个 `浏览器 ffmpeg` 的 demo, 整理了一个比较舒服的流程。
 ```mermaid
     graph LR
     C[上传需处理文件] -->
@@ -183,7 +183,7 @@ const props = {
 
 
 #### 执行命令
-在输入参数，输出文件参数，执行脚本参数都填写完成以后，就可以点击进行运行了
+在`输入`，`输出文件`，`执行脚本`等参数都填写完成以后，就可以合并参数，运行 `ffmpeg 命令`, 获得输出结果了。
 ``` tsx
 await ffmpeg.run(...allArgs.split(' '));
 ```
@@ -193,7 +193,7 @@ await ffmpeg.run(...allArgs.split(' '));
 
 
 ### 增加一点优化
-ffmpeg 命令其实是比较难记的，让用户去记录或者自行查找并不友好。
+ffmpeg 命令其实是比较难记的，让用户自行查找并不友好。
 所以预期是将一些比较常用的命令全部记录一下，让用户可以直接选择。
 ```ts
 export const getOp = (op: string, args?: IGetOp) => {
@@ -232,19 +232,21 @@ export const getOp = (op: string, args?: IGetOp) => {
 TODO
 
 
-## 实现视频轨道
-为了可视化的实现音视频分割，需要实现一个轨道和播放器，来精细化的设置分割点位，并且通过播放器实时看到点位的视频效果。（参考了项目 [shWave](https://github.com/Shirtiny/shWave)，实现一个超级简单的轨道。）
+## 视频轨道（可视化的音视频分割）
+为了实现`可视化的音视频分割`，需要实现一个轨道和播放器，通过轨道来精细化的设置分割点位，通过播放器实时看到点位的视频效果。这里参考了开源项目 [shWave](https://github.com/Shirtiny/shWave)，实现了一个简单的轨道。
 
 ### 整体分析
-将轨道拆分的话，分为
+将轨道拆分的话，分为:
 - 背景
 - 刻度尺
 - 时间指针（指向当前视频播放的时刻）
 
-### 静态实现
+然后我们按照`静态部分 -> 动态部分（参数传递） -> 动态部分（事件响应、缩放条） `的顺序进行实现。
 
-####  canvas 架子
-轨道是 canvas 实现的，所以首先要在页面添加一个 
+### 静态部分实现
+
+####  添加画布到页面 
+轨道是 canvas 实现的，所以首先要在页面添加一个画布
 ```js
 <canvas
     ref={$canvas}
@@ -258,7 +260,7 @@ TODO
 ></canvas>
 ```
 
-然后在获取到 canvas 以后，开始进行轨道的绘制
+在 canvas 加载完成以后，开始进行轨道的绘制
 ``` js
 useEffect(() => {
     if (!waveCanvas) { return }
@@ -267,7 +269,7 @@ useEffect(() => {
  // 各种场景都有可能触发重新绘制
 ```
 
-` draw ` 函数中，分别对提到的三个元素进行绘制。
+` draw ` 函数中，分别对提到的三个元素（背景、刻度尺、时间指针）进行绘制。
 
 ```js
 const draw = () => {
@@ -308,14 +310,15 @@ export const drawBackground = (canvas: HTMLCanvasElement, ctx: CanvasRenderingCo
 ```
 
 效果展示
-![](./assets/1.png)
+![1.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/20ce493bfd00405595f58573f27f8493~tplv-k3u1fbpfcp-watermark.image?)
 
 ##### 绘制刻度尺
-刻度尺就是循环遍历，然后绘制长短不一的小矩形
-- 整秒，最长
-- 0.5 秒，次之
-- 0.1 秒，最短
-然后在整秒刻度下面，会有文字显示
+刻度尺就是循环遍历，然后绘制长短不一的小矩形,然后在整秒刻度下面，会有文字显示:
+- 整秒，最长;
+- 0.5 秒，次之;
+- 0.1 秒，最短;
+
+
 
 ###### 整秒
 length 是需要的`秒长度 * 10`，然后进行遍历，每 10 * 0.1 时，绘制最长的矩形。
@@ -333,7 +336,8 @@ for (let index = 0; index < length; index += 1) {
         }
 }
 ```
-![](./assets/2.png)
+
+![2.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fc4dbc3f1f9e4e32bd536dc7c1affaaf~tplv-k3u1fbpfcp-watermark.image?)
 
 
 ###### 0.5 秒
@@ -343,7 +347,8 @@ else if (index % 5 === 0) {
     ctx.fillRect(index * gap, 0, pixelRatio, (fontHeight * pixelRatio) / 1.5);
 }
 ```
-![](./assets/3.png)
+
+![3.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/19e970df37e3486094fa7fb5d7a37976~tplv-k3u1fbpfcp-watermark.image?)
 
 
 ###### 0.1 秒
@@ -354,7 +359,8 @@ else {
     ctx.fillRect(index * gap, 0, pixelRatio, (fontHeight * pixelRatio) / 3);
 }
 ```
-![](./assets/4.png)
+
+![4.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2d97977e17a14eefa07a732c613ca490~tplv-k3u1fbpfcp-watermark.image?)
 
 
 duration 文字展示
@@ -372,15 +378,16 @@ if (index % 10 === 0) {
     );
 }
 ```
-![](./assets/5.png)
+
+![5.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1118dc73fcc84c7080c680fe58c721dc~tplv-k3u1fbpfcp-watermark.image?)
 
 
 ##### 时间线（timer)
-时间刻度线其实就是一个矩形，指示这当前视频播放的时刻吗，也就是 currentTime 对应的时间刻度。
+时间刻度线其实就是一个矩形，指示着当前视频播放的时刻，也就是 currentTime 对应的时间刻度。
 
 ```js
 const { width, height } = canvas;
-ctx.fillStyle = color
+
 const length = getLength(duration);
 
 // 每 0.1 s 所对应的像素宽度。
@@ -396,14 +403,15 @@ ctx.fillRect(
     height, // height
 )
 ```
-![](./assets/6.png)
+
+![6.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/605688f8adb54e3882938bb65299a247~tplv-k3u1fbpfcp-watermark.image?)
 
 做到这里，一个静态时间轴的效果就已经有了。
 
 ### 参数传递
 
 接下来，我们将变量全部通过参数的形式传递进来，这样子就可以让时间轴动起来。
-这里，我们通过 storybook 来查看实时效果。
+这里，我们通过 `storybook` 来查看实时效果。
 ```js
   argTypes: {
     currentTime: {
@@ -435,7 +443,8 @@ ctx.fillRect(
 ```
 
 效果如图，在下方修改入参，上方会看到实时效果。
-![](./assets/7.png)
+
+![7.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a9b1c5684a374662a978faad2f82fcd4~tplv-k3u1fbpfcp-watermark.image?)
 
 
 ### 事件响应
@@ -444,10 +453,33 @@ ctx.fillRect(
 shwave 是通过调整 duration来进行缩放的。这个方案有一个问题，就是放大的时候，无法看到后面的 duration ，只能放大前面的 duration。
 我认为更加合适的方式应该是增加一个缩放比的字段，来控制轨道的长度。在下方增加一个滚动条，当放到轨道以后，可以通过滚动来查看后面的时间。
 
-![](./assets/10.png)
+用 Slider + InputNumber 实现一个可以拖拽，可以输入的缩放条。
+```js
+  <Col span={5}>
+      <Slider
+          min={1}
+          max={20}
+          onChange={(value: number) => setRatio(value)}
+          value={ratio}
+          step={0.1} />
+  </Col>
+  <Col span={8}>
+      <InputNumber
+          min={1}
+          max={20}
+          style={{ margin: '0 16px' }}
+          step={0.1}
+          value={ratio}
+          onChange={(value: number | null) => setRatio(value || 1)}
+      />
+  </Col>
+
+```
+
+![10.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dfc3f334a30a4bb182121bad3064925b~tplv-k3u1fbpfcp-watermark.image?)
 
 #### 轨道点击
-当进行轨道点击以后，需要进行计算点到的对应时刻，然后重新设置 currentTime
+当进行轨道点击以后，需要计算点到的对应时刻，然后重新设置 currentTime
 
 首先进行 canvas 的监听
 ```js
@@ -463,22 +495,21 @@ useEffect(() => {
 }, [waveCanvas])
 ```
 
-在监听到事件点击以后，直接计算对应时刻， 进行设置就好。
+在监听到事件点击以后，直接计算对应时刻，进行设置就好。
 ```js
 const onCanavsClick = (event: MouseEvent) => {
     const time = computeTimeFromEvent(event);
     if (currentTime !== time) {
         click?.(time);
-        draw();
     }
 };
 ```
 
 偏移时刻是如何计算的呢
 
-- 每一个所占的像素大小
-- 计算点击位置距离左侧的偏移大小
-- 根据偏移量，计算在时间轴中对应的时刻
+- 计算每一个所占的像素大小；
+- 计算点击位置距离左侧的偏移大小；
+- 根据偏移量，计算在时间轴中对应的时刻；
 
 
 ```js
@@ -549,11 +580,36 @@ useEffect(() => {
 ```
 
 #### 基本效果展示
-![](./assets/9.png)
+![9.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f37e49ce1bbb4cf99bd277bb0abe59e2~tplv-k3u1fbpfcp-watermark.image?)
 
 
-## 项目
+## 可视化视频剪辑
+在 ffmpeg 运行在浏览器、轨道和播放器联动两件事情做完以后，接下来，我们就可以实现一个简单的可视化视频剪辑了。
 
+ffmpeg 命令中，实现剪辑功能需要提供起始点时间和结束点时间。
+```bash
+ffmpeg -ss 00:17:24  -to 02:19:31 -i inputVideo.mp4 -c:v copy -c:a copy outputVideo.mp4
+```
+
+所以一个完整的流程应该是这样子的：
+
+```mermaid
+graph 
+K[开始]--上传视频-->A[加载视频/轨道]
+A--通过轨道点击或者视频播放-->E[加载合适的点位]
+E--点击按钮-->F[设置当前时刻为起始点或者结束点]
+F--点击运行-->G[生成剪辑的视频]
+G--点击下载-->X[完成任务]
+```
+
+效果截图
+
+![截屏2023-06-25 22.14.58.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6bee5ccec5c9495a8550eb99288f7c70~tplv-k3u1fbpfcp-watermark.image?)
+
+## 其他细节点
+
+### 本地保存文件，
+这样子在刷新页面以后，还是能够拿到之前上传的文件。
 
 
 

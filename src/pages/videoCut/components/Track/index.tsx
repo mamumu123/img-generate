@@ -80,7 +80,6 @@ export const Track: FC<Props> = ({
         const time = computeTimeFromEvent(event);
         if (currentTime !== time) {
             click?.(time);
-            draw();
         }
     };
 
