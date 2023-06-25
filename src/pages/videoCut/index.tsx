@@ -8,9 +8,8 @@ import { useModel } from '@umijs/max';
 
 const Index = () => {
   // TDOO: 音视频展示
-  const { mediaFile, mediaType } = useModel('video')
+  const { mediaFile, mediaType, videoCurrentTime, setVideoCurrentTime } = useModel('video')
 
-  const [currentTime, setCurrentTime] = useState(0);
   const [url, setSrc] = useState('');
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const [duration, setDuration] = useState(10);
@@ -28,7 +27,7 @@ const Index = () => {
 
     if (!playerRef.current) {
       console.error('onClick no playerRef')
-      setCurrentTime(time);
+      setVideoCurrentTime(time);
       return
     }
     playerRef.current.pause()
@@ -48,15 +47,15 @@ const Index = () => {
         <div className={styles.main_right}>
           <div className={styles.main_top}>
             <div className={styles.asset}>
-              <FfmpegComponent />
+              <FfmpegComponent duration={duration} />
             </div>
             <div className={styles.pre}>
-              <VideoPlayer playerRef={playerRef} setCurrentTime={setCurrentTime} url={url} setDuration={setDuration} />
+              <VideoPlayer playerRef={playerRef} setCurrentTime={setVideoCurrentTime} url={url} setDuration={setDuration} />
               <Button onClick={onLoadDemo}>加载 demo url</Button>
             </div>
           </div>
           <div className={styles.main_bottom}>
-            <Track currentTime={currentTime} click={onClick} duration={duration} />
+            <Track currentTime={videoCurrentTime} click={onClick} duration={duration} />
           </div>
         </div>
       </div>

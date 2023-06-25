@@ -5,8 +5,10 @@ export interface ISrc {
 }
 
 interface IGetOp {
-  // out?: string
-  // input?: string
+  out?: string
+  input?: string
+  rangeLeft?: number
+  rangeRight?: number
   timer?: string;
 }
 
@@ -16,9 +18,11 @@ export const DEFAULT_ARGS = OUT_DEFAULT;
 
 
 export const OP_NAME = {
-  getInfo: 'getInfo',
+  getInfo: 'getInfo', // 获取视频信息
   screenshot: 'screenshot',
-  getMp3FromVideo: 'getMp3FromVideo',
+  getMp3FromVideo: 'getMp3FromVideo',  // TODO: confirm  if error
+  custom: 'custom', // 自定义
+  cutVideo: 'cutVideo',
 };
 
 //      getAudioFromVideo: '-vn -y -acodec copy 3.aac',
@@ -32,15 +36,32 @@ export const getOp = (op: string, args?: IGetOp) => {
       resultOp = `-ss ${timer}  -vframes 1`;
       output = 'out.png';
       break;
+
     case OP_NAME.getMp3FromVideo:
       resultOp = ` -f mp3 -vn`;
       output = 'out.mp3';
       break;
+
     case OP_NAME.getInfo:
       resultOp = '';
       output = OUT_DEFAULT;
-
       break;
+
+    case OP_NAME.custom:
+      resultOp = '';
+      output = OUT_DEFAULT;
+      break;
+
+    case OP_NAME.cutVideo:
+      const { rangeLeft, rangeRight, input, out } = args || {};
+      // ffmpeg -ss [start] -i [input] -to [end] -c copy [output]
+      // ffmpege -ss 01:02:03 -t 80 -i inputVideo.mp4
+      // ./ffmpeg -ss 00:17:24  -to 02:19:31 -i inputVideo.mp4 -threads 2 -c:v copy -c:a copy outputVideo.mp4
+      resultOp = `-ss ${rangeLeft} -to ${rangeRight} -i ${input} -c:v copy -c:a copy ${out}`;
+
+      output = OUT_DEFAULT;
+      break;
+
     default:
       resultOp = DEFAULT_ARGS;
       output = OUT_DEFAULT;
@@ -54,7 +75,7 @@ export const optionSetting = [
     label: '获取视频信息',
   },
   {
-    value: '',
+    value: OP_NAME.custom,
     label: '自定义输入',
   },
   // {
@@ -64,6 +85,10 @@ export const optionSetting = [
   {
     value: OP_NAME.getMp3FromVideo,
     label: '提取音频',
+  },
+  {
+    value: OP_NAME.cutVideo,
+    label: '视频分割',
   },
 ];
 
