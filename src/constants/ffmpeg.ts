@@ -9,7 +9,7 @@ interface IGetOp {
   input?: string
   rangeLeft?: number
   rangeRight?: number
-  timer?: string;
+  timer?: number;
 }
 
 export const OUT_DEFAULT = 'output.mp4';
@@ -28,12 +28,13 @@ export const OP_NAME = {
 //      getAudioFromVideo: '-vn -y -acodec copy 3.aac',
 export const getOp = (op: string, args?: IGetOp) => {
   // const { out = OUT_DEFAULT, input = IN_DEFAULT, timer } = args || {}
-  const { timer } = args || {};
   let output = '';
   let resultOp = '';
+  const { rangeLeft, rangeRight, input, out, timer } = args || {};
+
   switch (op) {
     case OP_NAME.screenshot:
-      resultOp = `-ss ${timer}  -vframes 1`;
+      resultOp = `-i ${input} -ss ${timer}  -vframes 1 ${out}`;
       output = 'out.png';
       break;
 
@@ -53,12 +54,10 @@ export const getOp = (op: string, args?: IGetOp) => {
       break;
 
     case OP_NAME.cutVideo:
-      const { rangeLeft, rangeRight, input, out } = args || {};
       // ffmpeg -ss [start] -i [input] -to [end] -c copy [output]
       // ffmpege -ss 01:02:03 -t 80 -i inputVideo.mp4
       // ./ffmpeg -ss 00:17:24  -to 02:19:31 -i inputVideo.mp4 -threads 2 -c:v copy -c:a copy outputVideo.mp4
       resultOp = `-ss ${rangeLeft} -to ${rangeRight} -i ${input} -c:v copy -c:a copy ${out}`;
-
       output = OUT_DEFAULT;
       break;
 
@@ -78,10 +77,10 @@ export const optionSetting = [
     value: OP_NAME.custom,
     label: '自定义输入',
   },
-  // {
-  //   value: OP_NAME.screenshot,
-  //   label: '视频截图',
-  // },
+  {
+    value: OP_NAME.screenshot,
+    label: '视频截图',
+  },
   {
     value: OP_NAME.getMp3FromVideo,
     label: '提取音频',

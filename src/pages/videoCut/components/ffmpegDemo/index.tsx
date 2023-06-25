@@ -47,6 +47,8 @@ export default function FFmpegComponent({ duration = 0 }) {
 
   const isCut = inputType === OP_NAME.cutVideo;
 
+  const isSnap = inputType === OP_NAME.screenshot;
+
   useEffect(() => {
     setRangeRight(duration)
   }, [duration])
@@ -62,7 +64,7 @@ export default function FFmpegComponent({ duration = 0 }) {
   // complete params
   const allArgs = useMemo(
     () => {
-      if (isCut) {
+      if (isCut || isSnap) {
         return `${args}`;
       }
       return `-i ${opInput} ${args} ${opOutput}`;
@@ -77,6 +79,7 @@ export default function FFmpegComponent({ duration = 0 }) {
         rangeRight,
         input: opInput || '',
         out: opOutput,
+        timer: videoCurrentTime,
       });
       setArgs(op);
       setOpOutput(output);
@@ -84,7 +87,7 @@ export default function FFmpegComponent({ duration = 0 }) {
       setArgs(DEFAULT_ARGS);
       setOpOutput(OUT_DEFAULT);
     }
-  }, [inputType, rangeRight, rangeLeft, opInput, opOutput])
+  }, [inputType, rangeRight, rangeLeft, opInput, opOutput, videoCurrentTime])
 
   // 结果列表
   const [videoSrc, setVideoSrc] = useState<ISrc | null>(); // output files
@@ -161,10 +164,14 @@ export default function FFmpegComponent({ duration = 0 }) {
 
             <Input type="text" value={args} onChange={onHandleChange}></Input>
           </div>
-
-          <Button onClick={() => setRangeLeft(videoCurrentTime)} disabled={!isCut} >设置为起始点</Button>
-          <Button onClick={() => setRangeRight(videoCurrentTime)} disabled={!isCut} >设置为结束点</Button>
-
+          {
+            isCut && (
+              <>
+                <Button onClick={() => setRangeLeft(videoCurrentTime)}>设置为起始点</Button>
+                <Button onClick={() => setRangeRight(videoCurrentTime)}>设置为结束点</Button>
+              </>
+            )
+          }
 
           <h3>输出文件名</h3>
           <Input
