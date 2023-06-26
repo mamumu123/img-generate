@@ -4,11 +4,24 @@
 
 *   如何在浏览器运行 ffmpeg 处理音视频；
 *   如何用 canvas 实现一个视频轨道;
-*   结合视频轨道和 ffmpeg, 实现视频编辑可视化；
+*   如何结合轨道、播放器和 ffmpeg, 实现视频编辑可视化；
 
 ## 关键词
 
-ffmpeg、track、音视频、轨道、可视化、canvas
+ffmpeg、video、轨道、可视化、canvas
+
+## 效果截图
+
+
+![截屏2023-06-26 20.59.14.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0bb9f88f9ca648f5ac543f9e7c12242d~tplv-k3u1fbpfcp-watermark.image?)
+
+## 体验地址
+[videoCut](https://img-generate-six.vercel.app/videoCut/videoCut)(部署在 vercel， 需科学上网）
+
+## 代码仓库
+
+[img-generate
+](https://github.com/mamumu123/img-generate)(都点进去了，帮我点个免费的 star 吧🥰)
 
 ## 项目背景
 
@@ -22,7 +35,7 @@ ffmpeg、track、音视频、轨道、可视化、canvas
 *   获取视频信息，如帧率；
 *   ...
 
-如果在本地分析，需要先配置环境，安装 ffmpeg 等分析工具，需要比较多的准备工作。而如果使用 wasm 技术，能够在浏览器端直接运行 ffmpeg，不需要本地安装下载，对小白用户会更加友好。
+如果在本地分析，得先配置环境，安装 ffmpeg 等分析工具，需要比较多的准备工作。而如果使用 wasm 技术，在浏览器端直接运行 ffmpeg，不需要本地安装下载，对小白用户会更加友好。
 
 ## 动手试试-在浏览器使用 ffmpeg
 
@@ -226,27 +239,37 @@ ffmpeg 命令其实是比较难记的，让用户自行查找并不友好。
 
 ```ts
 export const getOp = (op: string, args?: IGetOp) => {
-  const { timer } = args || {};
+  // const { out = OUT_DEFAULT, input = IN_DEFAULT, timer } = args || {}
   let output = '';
   let resultOp = '';
+  const { rangeLeft, rangeRight, input, out, timer } = args || {};
+
   switch (op) {
-    // 截图
     case OP_NAME.screenshot:
-      resultOp = `-ss ${timer}  -vframes 1`;
+      resultOp = `-i ${input} -ss ${timer}  -vframes 1 ${out}`;
       output = 'out.png';
       break;
-      
-    // 从视频中抽出音频
+
     case OP_NAME.getMp3FromVideo:
       resultOp = ` -f mp3 -vn`;
       output = 'out.mp3';
       break;
-    
-    // 获取视频信息
+
     case OP_NAME.getInfo:
       resultOp = '';
-
+      output = OUT_DEFAULT;
       break;
+
+    case OP_NAME.custom:
+      resultOp = '';
+      output = OUT_DEFAULT;
+      break;
+
+    case OP_NAME.cutVideo:
+      resultOp = `-ss ${rangeLeft} -to ${rangeRight} -i ${input} -c:v copy -c:a copy ${out}`;
+      output = OUT_DEFAULT;
+      break;
+
     default:
       resultOp = DEFAULT_ARGS;
       output = OUT_DEFAULT;
@@ -257,11 +280,12 @@ export const getOp = (op: string, args?: IGetOp) => {
 
 效果如下图
 
-![截屏2023-02-03 16.07.20.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4e66b591e9bc459f86ca19d091102daf~tplv-k3u1fbpfcp-zoom-1.image)
+
+![截屏2023-06-26 19.59.00.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/715e11f0c88844f88970fd4fd328dbcb~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 体验地址
 
-TODO
+[ffmpeg](https://img-generate-six.vercel.app/videoCut/ffmpeg)(部署在 vercel， 需科学上网）
 
 ## 视频轨道（可视化的音视频分割）
 
@@ -634,7 +658,7 @@ useEffect(() => {
 
 ## 可视化视频剪辑
 
-在 ffmpeg 运行在浏览器、轨道和播放器联动两件事情做完以后，我们就可以实现一个简单的可视化视频剪辑了。
+在 ffmpeg 运行在浏览器、轨道和播放器联动两件事情做完以后，我们就可以实现可视化视频剪辑的功能了。
 
 ### 视频分割
 
@@ -673,9 +697,102 @@ ffmpeg -i ${input} -ss ${timer}  -vframes 1 ${out}
 
 ## 其他细节点
 
-### 本地保存文件，
+### 本地保存上传文件
+在上传文件以后，如果刷新页面，上传的文件就会丢失，所以增加一个本地缓存是有必要的。这样子在误刷新页面以后，还是能够拿到之前上传的文件。存储文件选择的是 indexDb，因为存储空间足够大。 而平时更多使用的 localStorage存储空间则比较小， 最大存储空间只有 5M。
 
-这样子在刷新页面以后，还是能够拿到之前上传的文件。
+#### 初始化
+在 react 项目中，有一些现成的库可以直接使用，其中使用量最多的就是 `dexie`。
+我们首先引入 dexie， 进行数据库表的定义。
+
+```ts
+// db.ts
+import Dexie, { Table } from 'dexie';
+
+export interface FileData {
+    id?: number;
+    name: string;
+    type: string;
+    data: File;
+}
+
+export class FileDexie extends Dexie {
+
+    files!: Table<FileData>;
+
+
+    constructor() {
+        super('myDatabase');
+        this.version(1).stores({
+            files: '++id, name, type, data' // Primary key and indexed props
+        });
+    }
+}
+
+export const dbFileDexie = new FileDexie();
+```
+
+
+
+#### 保存上传文件
+在 indexDb 初始化完成以后，我们开始上传文件，然后在上传组件的 `onChange`函数中调用`db.files.put`函数，就可以将文件存到 indexDb 中。
+```tsx
+    const handleMediaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            try {
+                const { name } = file;
+                db.files.put({ name, type: file.type, data: file })
+            } catch (error) {
+                console.error('handleMediaChange error', error)
+            }
+        };
+    }
+    
+ <input type="file" onChange={handleMediaChange} />
+```
+
+使用的地方，则调用 useLiveQuery 进行查询。
+
+```js
+import { useLiveQuery } from 'dexie-react-hooks';
+import { dbFileDexie as db } from '@/db'
+
+const mediaList = useLiveQuery(
+    () => db.files?.toArray?.()
+);
+```
+
+### 生产环境部署
+由于 ffmpeg 依赖跨源隔离，需要配置响应头，部署在 github 是不行的。所以找了另外一个免费的部署平台 [vercel](https://vercel.com/) ,缺点是国内需要科学上网。
+vercel 部署的教程很多，不再啰嗦。只分享一下 `vercel.json`，实现了设置响应头和支持 history 路由。
+
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+      ]
+    }
+  ]
+}
+```
+
+
+
+## TODO
+做到这里，其实只是完成了一个 demo。但是觉得还有很多可以做的事情。如果进一步完善这个项目，就可以给自己之后的工作和生活提供便利，做成一个有用的工具。
+
+- [ ] 样式优化
+- [ ] 音频可视化，截取音频片段
+- [ ] 测试素材生成
+- [ ] 支持字幕功能（分离、添加）
+- [ ] 自行编译 ffmpeg ，减少包体积,去掉 SharedArrayBuffer 的依赖。
 
 ## 参考
 
@@ -690,3 +807,5 @@ ffmpeg -i ${input} -ss ${timer}  -vframes 1 ${out}
 <https://github.com/cs8425/ffmpeg-cli-online>
 
 <https://github.com/xiguaxigua/ffmpeg-online>
+
+<https://github.com/Shirtiny/shWave>
