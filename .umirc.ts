@@ -84,6 +84,7 @@ export default defineConfig({
   analytics: {
     baidu: 'e4ec5f782f5d1d99801021aff8419db7',
   },
+  esbuildMinifyIIFE: true,
   npmClient: 'yarn',
   metas: [
     {
