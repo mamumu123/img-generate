@@ -38,7 +38,6 @@ const routes = [
         component: './videoCut/views/track',
       },
     ],
-    hide: !isDEV,
   },
   {
     name: '头像拼接',
