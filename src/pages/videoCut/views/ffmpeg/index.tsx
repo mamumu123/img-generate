@@ -9,11 +9,10 @@ import {
   getOp,
   ISrc,
   mediaType,
-  OP_NAME,
   optionSetting,
   OUT_DEFAULT,
 } from '@/constants/ffmpeg';
-import FileUpload from '../FileUpload';
+import FileUpload from '../../components/FileUpload';
 import { useModel } from '@umijs/max';
 import { Output } from './OutputComponent';
 import { useLocalStorageState } from 'ahooks';
@@ -23,10 +22,13 @@ const ffmpeg = createFFmpeg({
   corePath: `${window.location.origin}${process.env.PUBLIC_PATH}static/v0.11.0/ffmpeg-core.js`,
 });
 
-export default function FFmpegComponent({ duration = 0 }) {
+export default function FFmpegComponent() {
   const { stderr, setStderr, progress, ffmpegIsLoaded } = useFfmpeg(ffmpeg);
 
-  const { media, mediaName: opInput, videoCurrentTime } = useModel('video')
+  const { media } = useModel('video')
+
+  // input name
+  const opInput = media?.name;
 
   // op param
   const [args, setArgs] = useLocalStorageState('args', {
@@ -41,18 +43,6 @@ export default function FFmpegComponent({ duration = 0 }) {
   // output name
   const [opOutput, setOpOutput] = useState('');
 
-  // 
-  const [rangeLeft, setRangeLeft] = useState(0);
-  const [rangeRight, setRangeRight] = useState(0);
-
-  const isCut = inputType === OP_NAME.cutVideo;
-
-  const isSnap = inputType === OP_NAME.screenshot;
-
-  useEffect(() => {
-    setRangeRight(duration)
-  }, [duration])
-
   // 输入的类型后缀
   const outputType = useMemo(() => {
     const str = (opOutput.split('.').at(-1) || '') as any;
@@ -63,31 +53,20 @@ export default function FFmpegComponent({ duration = 0 }) {
 
   // complete params
   const allArgs = useMemo(
-    () => {
-      if (isCut || isSnap) {
-        return `${args}`;
-      }
-      return `-i ${opInput} ${args} ${opOutput}`;
-    },
-    [opInput, args, opOutput, isCut],
+    () => `-i ${opInput} ${args} ${opOutput}`,
+    [opInput, args, opOutput],
   );
 
   useEffect(() => {
     if (inputType) {
-      const [op, output] = getOp(inputType, {
-        rangeLeft,
-        rangeRight,
-        input: opInput || '',
-        out: opOutput,
-        timer: videoCurrentTime,
-      });
+      const [op, output] = getOp(inputType);
       setArgs(op);
       setOpOutput(output);
     } else {
       setArgs(DEFAULT_ARGS);
       setOpOutput(OUT_DEFAULT);
     }
-  }, [inputType, rangeRight, rangeLeft, opInput, opOutput, videoCurrentTime])
+  }, [inputType])
 
   // 结果列表
   const [videoSrc, setVideoSrc] = useState<ISrc | null>(); // output files
@@ -154,25 +133,15 @@ export default function FFmpegComponent({ duration = 0 }) {
         <h2> 步骤2: 填写处理参数</h2>
         <div style={{ marginBottom: 10 }}>
           <h3>参数</h3>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-            <Select
-              value={inputType}
-              style={{ width: 220 }}
-              onChange={(value) => setInputType(value)}
-              options={optionSetting}
-            />
 
-            <Input type="text" value={args} onChange={onHandleChange}></Input>
-          </div>
-          {
-            isCut && (
-              <>
-                <Button onClick={() => setRangeLeft(videoCurrentTime)}>设置为起始点</Button>
-                <Button onClick={() => setRangeRight(videoCurrentTime)}>设置为结束点</Button>
-              </>
-            )
-          }
+          <Select
+            value={inputType}
+            style={{ width: 220, marginBottom: 10 }}
+            onChange={(value) => setInputType(value)}
+            options={optionSetting}
+          />
 
+          <Input type="text" value={args} onChange={onHandleChange}></Input>
           <h3>输出文件名</h3>
           <Input
             type="text"
@@ -182,7 +151,7 @@ export default function FFmpegComponent({ duration = 0 }) {
             }}
           ></Input>
           <h3>完整参数展示</h3>
-          <Input type="text" value={`ffmpeg ${allArgs}`} disabled></Input>
+          <Input type="text" value={allArgs} disabled></Input>
         </div>
       </div>
 
@@ -199,7 +168,8 @@ export default function FFmpegComponent({ duration = 0 }) {
             onClick={onRun}
             disabled={!opInput || !allArgs}
           >
-            运行
+            {' '}
+            运行{' '}
           </Button>
 
           {progress !== 0 && <Progress percent={progress} />}
@@ -217,6 +187,6 @@ export default function FFmpegComponent({ duration = 0 }) {
           />
         </div>
       </div>
-    </div >
+    </div>
   );
 }

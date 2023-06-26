@@ -15,8 +15,29 @@ const routes = [
   {
     name: '音视频工具',
     path: '/videoCut',
-    component: './videoCut',
-    hide: !isDEV,
+    component: '@/layouts/index',
+    routes: [
+      {
+        name: '工具',
+        component: './videoCut',
+        path: '/videoCut/videoCut',
+      },
+      {
+        name: '上传',
+        path: '/videoCut/upload',
+        component: './videoCut/components/FileUpload',
+      },
+      {
+        name: 'ffmpeg',
+        path: '/videoCut/ffmpeg',
+        component: './videoCut/views/ffmpeg',
+      },
+      {
+        name: '轨道',
+        path: '/videoCut/track',
+        component: './videoCut/views/track',
+      },
+    ],
   },
   {
     name: '头像拼接',
@@ -37,12 +58,6 @@ const routes = [
     name: '三原色',
     path: '/red',
     component: './RGBColorPicker',
-  },
-  {
-    name: '上传',
-    path: '/upload',
-    component: './videoCut/components/FileUpload',
-    hide: !isDEV,
   },
   { component: '@/pages/' },
 ].filter((item) => item.hide !== true)
@@ -68,6 +83,7 @@ export default defineConfig({
   analytics: {
     baidu: 'e4ec5f782f5d1d99801021aff8419db7',
   },
+  esbuildMinifyIIFE: true,
   npmClient: 'yarn',
   metas: [
     {

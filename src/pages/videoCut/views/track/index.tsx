@@ -1,25 +1,26 @@
 import styles from './index.less';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { Track } from './components/Track'
-import { VideoPlayer } from './components/VideoPlayer';
+import { Track } from '../../components/Track'
+import { VideoPlayer } from '../../components/VideoPlayer';
 import FfmpegComponent from '@/pages/videoCut/components/ffmpegDemo'
 import { useModel } from '@umijs/max';
 
 const Index = () => {
   // TDOO: 音视频展示
-  const { mediaFile, mediaType, videoCurrentTime, setVideoCurrentTime } = useModel('video')
+  // const { mediaFile, mediaType } = useModel('video')
 
+  const [currentTime, setCurrentTime] = useState(0);
   const [url, setSrc] = useState('');
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const [duration, setDuration] = useState(10);
 
   console.log('xxxx duration', duration)
-  useEffect(() => {
-    if (!mediaFile) { return }
-    const url = URL.createObjectURL(mediaFile)
-    setSrc(url);
-  }, [mediaFile])
+  // useEffect(() => {
+  //   if (!mediaFile) { return }
+  //   const url = URL.createObjectURL(mediaFile)
+  //   setSrc(url);
+  // }, [mediaFile])
 
 
   // 先不放 video
@@ -27,7 +28,7 @@ const Index = () => {
 
     if (!playerRef.current) {
       console.error('onClick no playerRef')
-      setVideoCurrentTime(time);
+      setCurrentTime(time);
       return
     }
     playerRef.current.pause()
@@ -47,15 +48,15 @@ const Index = () => {
         <div className={styles.main_right}>
           <div className={styles.main_top}>
             <div className={styles.asset}>
-              <FfmpegComponent duration={duration} />
+              {/* asset */}
+              <Button onClick={onLoadDemo}>加载 demo</Button>
             </div>
             <div className={styles.pre}>
-              <VideoPlayer playerRef={playerRef} setCurrentTime={setVideoCurrentTime} url={url} setDuration={setDuration} />
-              <Button onClick={onLoadDemo}>加载 demo url</Button>
+              <VideoPlayer playerRef={playerRef} setCurrentTime={setCurrentTime} url={url} setDuration={setDuration} />
             </div>
           </div>
           <div className={styles.main_bottom}>
-            <Track currentTime={videoCurrentTime} click={onClick} duration={duration} />
+            <Track currentTime={currentTime} click={onClick} duration={duration} />
           </div>
         </div>
       </div>

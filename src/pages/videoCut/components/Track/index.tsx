@@ -61,16 +61,13 @@ export const Track: FC<Props> = ({
         // 偏移的宽度
         const { x: left } = getCanvasMousePosition(waveCanvas, event);
         const { clientWidth: width } = waveCanvas;// canvas 实际宽度
-        const pixelRatio = window.devicePixelRatio; // 1
         const length = getLength(durationRef.current); // 总长度
-        // TODO: 这里的 width 以后要改造，宽度 * 放大比例
         const gap = getGap(width, length); // 0.1 s 所占用的像素宽度
-
 
         const begin = getBegin(currentTime, durationRef.current);
         // left 在 时间中的位置
         const time = clamp(
-            ((left / gap) * pixelRatio) / 10 + begin,
+            (left / gap) / 10 + begin,
             begin,
             begin + durationRef.current
         );
@@ -83,7 +80,6 @@ export const Track: FC<Props> = ({
         const time = computeTimeFromEvent(event);
         if (currentTime !== time) {
             click?.(time);
-            draw();
         }
     };
 
@@ -115,12 +111,10 @@ export const Track: FC<Props> = ({
         // // set canvas width, 否则会出现模糊情况
         // ctx.imageSmoothingEnabled = false;
         // https://developer.mozilla.org/zh-CN/docs/Web/API/Window/devicePixelRatio
-        const pixelRatio = window.devicePixelRatio;
 
-        const { width: containerWidth, height: containerHeight } = containerSize
-
-        waveCanvas.width = containerWidth * pixelRatio * ratio;
-        waveCanvas.height = containerHeight * pixelRatio;
+        const { width: containerWidth, height: containerHeight } = containerSize;
+        waveCanvas.width = containerWidth * ratio;
+        waveCanvas.height = containerHeight;
 
         $shwave.current.style.width = `${waveCanvas.width}px`;
 
@@ -128,13 +122,13 @@ export const Track: FC<Props> = ({
         drawBackground(waveCanvas, ctx, backgroundColor);
 
         // 刻度尺
-        drawRuler(waveCanvas, ctx, pixelRatio, durationRef.current)
+        drawRuler(waveCanvas, ctx, 1, durationRef.current)
 
         // 时间指针
         drawPointer({
             canvas: waveCanvas,
             ctx,
-            pixelRatio,
+            pixelRatio: 1,
             duration,
             currentTime,
             color: pointerColor,
