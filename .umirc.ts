@@ -63,7 +63,9 @@ const routes = [
 ].filter((item) => item.hide !== true)
 
 export default defineConfig({
-  antd: {},
+  antd: {
+
+  },
   access: {},
   model: {},
   // history: {
