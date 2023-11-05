@@ -4,8 +4,9 @@ const isDEV = process.env.NODE_ENV === 'development';
 
 const routes = [
   {
+    name: '首页',
     path: '/',
-    redirect: '/cut',
+    component: './goto',
   },
   {
     name: '图像处理',

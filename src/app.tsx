@@ -25,6 +25,6 @@ export const layout = () => {
     menu: {
       locale: false,
     },
-    footerRender: () => <Footer />,
+    // footerRender: () => <Footer />,
   };
 };

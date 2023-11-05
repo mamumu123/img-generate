@@ -19,11 +19,9 @@ const HomePage: React.FC = () => {
 
   // 选择的图片，用来拼接
   const [imgSelect, setImgSelect] = useState('');
-  console.log('imgSelect', imgSelect);
 
   // 用户头像
   const [imageUrl, setImageUrl] = useState<string>('');
-  console.log('imageUrl', imageUrl);
   const [loading, setLoading] = useState(false);
 
   const beforeUpload = (file: RcFile) => {
