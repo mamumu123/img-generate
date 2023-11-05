@@ -58,26 +58,30 @@ const routes = [
     name: '三原色',
     path: '/red',
     component: './RGBColorPicker',
+    hide: true,
   },
   { component: '@/pages/' },
 ].filter((item) => item.hide !== true)
 
 export default defineConfig({
-  antd: {
-
-  },
-  access: {},
+  antd: {},
   model: {},
   // history: {
   //   type: 'hash'
   // },
-  initialState: {},
+  // access: {},
+  // initialState: {},
   base: process.env.PUBLIC_PATH || '/',
   publicPath: process.env.PUBLIC_PATH || '/',
   request: {},
   layout: {
+    name: '',
     title: '工具中心',
+    logo: '/water.png'
   },
+  favicons: [
+    '/water.png'
+  ],
   define: {
     IS_ENV_DEVELOPMENT: isDEV,
   },
@@ -87,12 +91,5 @@ export default defineConfig({
   },
   esbuildMinifyIIFE: true,
   npmClient: 'yarn',
-  metas: [
-    {
-      httpEquiv: 'origin-trial',
-      content:
-        'Ahnv7FGao2cq+C3jTDLwV+C9cYehRObod7bjy9naBzPnxQasGZDFPSLunyOa8a47x+15DqM3VSHh8z5SH75rPgoAAAB9eyJvcmlnaW4iOiJodHRwczovL21hbXVtdTEyMy5naXRodWIuaW86NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=',
-    },
-  ],
-  headScripts: [{ src: './mini-coi.js' }]
+  // headScripts: [{ src: './mini-coi.js' }]
 });

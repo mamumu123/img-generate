@@ -11,9 +11,7 @@ import {
   toGaussianBlur,
 } from '@/utils/imageUtil';
 
-export const LENA_PATH =
-  'https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/69b1afc1723c4233ba09e37c845973f1~tplv-k3u1fbpfcp-watermark.image';
-
+export const LENA_PATH = '/water.png';
 export const OP = {
   toRed: 'toRed',
   toGreen: 'toGreen',
