@@ -60,7 +60,10 @@ const HomePage: React.FC = () => {
 
   return (
     <PageContainer ghost>
-      <div className={styles.container} style={{ background: background }}>
+      <div className={styles.container} style={{ background: background, position: 'relative' }}>
+        {true && (<div className={styles.tip}>
+          试着点击页面中的图片
+        </div>)}
         <canvas width={500} height={500} ref={canvasRef}></canvas>
       </div>
     </PageContainer>
